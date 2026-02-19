@@ -13,7 +13,6 @@ import {
   Typography,
   Avatar,
   alpha,
-  Divider,
   Button,
   Drawer,
   useMediaQuery,
