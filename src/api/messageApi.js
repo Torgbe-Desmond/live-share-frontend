@@ -1,5 +1,5 @@
 // src/api/messageApi.js
-const BASE_URL = "http://127.20.10.2:5000/api/messages";
+const BASE_URL = "https://live-share-5bkp.onrender.com/api/messages";
 
 export const createMessageApi = async (data, files) => {
   const formData = new FormData();

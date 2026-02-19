@@ -1,7 +1,7 @@
 // src/socket.js
 import { io } from "socket.io-client";
 
-const socket = io("http://127.20.10.2:5000", {
+const socket = io("https://live-share-5bkp.onrender.com", {
   withCredentials: true,
 });
 

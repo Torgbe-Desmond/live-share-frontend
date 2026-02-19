@@ -15,6 +15,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 export default function Landing() {
   const navigate = useNavigate();
   const theme = useTheme();
+  
 
   return (
     <Box

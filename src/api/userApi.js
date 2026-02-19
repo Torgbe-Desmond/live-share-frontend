@@ -1,6 +1,6 @@
 // src/api/userApi.js
 
-const BASE_URL = "http://127.20.10.2:5000/api/users";
+const BASE_URL = "https://live-share-5bkp.onrender.com/api/users";
 
 /**
  * Create a new user
