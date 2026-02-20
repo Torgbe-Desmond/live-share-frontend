@@ -1,4 +1,4 @@
-import  { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   List,
@@ -56,7 +56,9 @@ export default function Playground() {
 
   useEffect(() => {
     const handleReceiveMessage = (data) => {
-      setMessages((prev) => [...prev, data]);
+      if (data.senderId !== senderId?.toString()) {
+        setMessages((prev) => [...prev, data]);
+      }
       const sum = { userId: data.senderId, username: data.username };
       handleUserJoin(sum);
     };
@@ -75,7 +77,9 @@ export default function Playground() {
     };
 
     const handleUserJoin = (data) => {
-      if (!data.username || data.userId === senderId?.toString()) return;
+      const isOwn = data.userId === senderId;
+
+      if (isOwn) return;
 
       setUsers((prevUsers) => {
         if (prevUsers.has(data.username)) return prevUsers;
@@ -108,7 +112,7 @@ export default function Playground() {
     if (!senderId || !roomName) return;
     if (!message.trim() && selectedFiles.length === 0) return;
 
-    socket.emit("sendMessage", {
+    const messageObject = {
       content: message.trim(),
       senderId,
       roomName,
@@ -119,11 +123,14 @@ export default function Playground() {
             username: replyingTo?.username,
           }
         : null,
-    });
+    };
+
+    setMessages((prev) => [...prev, messageObject]);
+    socket.emit("sendMessage", messageObject);
 
     setMessage("");
     setSelectedFiles([]);
-    setReplyingTo(null)
+    setReplyingTo(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 

@@ -44,8 +44,7 @@ export default function CreatePlayground() {
         roomName: data.roomName,
         userId: data.userId,
       });
-
-      navigate("/playground");
+      if (response) navigate("/playground");
     } catch (err) {
       setError(err.message || "Failed to create playground");
     } finally {
