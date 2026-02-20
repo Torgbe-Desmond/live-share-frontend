@@ -77,18 +77,16 @@ export default function Playground() {
     };
 
     const handleUserJoin = (data) => {
-      const isOwn = data.userId === senderId;
+      if (data.userId === senderId) return;
 
-      if (isOwn) return;
+      if (data?.username) {
+        setUsers((prev) => {
+          if (prev.has(data.username)) return prev;
+          return new Set([...prev, data.username]);
+        });
 
-      setUsers((prevUsers) => {
-        if (prevUsers.has(data.username)) return prevUsers;
-
-        const updatedUsers = new Set(prevUsers);
-        updatedUsers.add(data.username);
         setJoinedMessage(`${data.username} has joined the room`);
-        return updatedUsers;
-      });
+      }
     };
 
     socket.on("receiveMessage", handleReceiveMessage);

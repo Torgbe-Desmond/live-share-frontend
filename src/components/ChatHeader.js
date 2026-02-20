@@ -1,11 +1,8 @@
-import {
-  Box,
-  IconButton,
-  AppBar,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, AppBar, Toolbar, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import Tooltip from "@mui/material/Tooltip";
+import { useState } from "react";
 
 export default function ChatHeader({
   roomName,
@@ -13,6 +10,7 @@ export default function ChatHeader({
   isMobile,
   onMenuClick,
 }) {
+  const [copied, setCopied] = useState("");
   return (
     <AppBar
       position="static"
@@ -42,26 +40,59 @@ export default function ChatHeader({
         >
           Playground
         </Typography>
-
         {roomName && (
-          <Box
-            component="span"
-            sx={{
-              px: 1.5,
-              py: 0.4,
-              borderRadius: 10,
-              bgcolor: "action.hover",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              color: "text.secondary",
-              border: "1px solid",
-              borderColor: "divider",
-            }}
+          <Tooltip
+            title={copied ? "Copied!" : "Click to copy room code"}
+            arrow
+            placement="top"
           >
-            @{roomName}
-          </Box>
+            <Box
+              component="span"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(roomName);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1800); // feedback ~2 seconds
+                } catch (err) {
+                  console.error("Failed to copy:", err);
+                  // Optional: alert("Copy failed – try manually") or use a Snackbar
+                }
+              }}
+              sx={{
+                px: 1.5,
+                py: 0.4,
+                borderRadius: 10,
+                bgcolor: "action.hover",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "text.secondary",
+                border: "1px solid",
+                borderColor: "divider",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+                "&:hover": {
+                  bgcolor: "action.selected",
+                },
+                "&:active": {
+                  transform: "scale(0.98)",
+                },
+              }}
+            >
+             {roomName}
+              <ContentCopyIcon
+                fontSize="inherit"
+                sx={{
+                  opacity: copied ? 1 : 0.6,
+                  color: copied ? "success.main" : "inherit",
+                  fontSize: "1.1em",
+                }}
+              />
+            </Box>
+          </Tooltip>
         )}
-
         <Box sx={{ flex: 1 }} />
 
         <Box
@@ -82,7 +113,7 @@ export default function ChatHeader({
             }}
           />
           <Typography variant="body2" fontWeight={500}>
-            {usersCount} active
+            {usersCount} live
           </Typography>
         </Box>
       </Toolbar>
