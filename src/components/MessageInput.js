@@ -1,6 +1,7 @@
 import { Box, TextField, IconButton, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import useDeviceOS from "./useDeviceOS";
+import SoundMenu from "./SoundMenu";
 
 export default function MessageInput({
   message,
@@ -28,7 +29,7 @@ export default function MessageInput({
         ref={fileInputRef}
         onChange={(e) => {
           /* parent handles this */
-        }}  
+        }}
       />
 
       {replyingTo && (
@@ -64,6 +65,8 @@ export default function MessageInput({
           gap: 1,
         }}
       >
+        {/* <SoundMenu /> */}
+        
         <TextField
           fullWidth
           size="medium"

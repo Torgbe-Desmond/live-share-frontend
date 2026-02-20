@@ -15,7 +15,7 @@ export default function ChatHeader({
 }) {
   return (
     <AppBar
-      position="fixed"
+      position="static"
       elevation={0}
       sx={{
         borderBottom: "1px solid",

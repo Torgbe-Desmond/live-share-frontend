@@ -1,7 +1,6 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Box,
-  TextField,
   Button,
   Typography,
   Paper,
@@ -11,9 +10,12 @@ import {
   useTheme,
   Container,
   useMediaQuery,
+  TextField,
+  Chip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import KeyIcon from "@mui/icons-material/Key";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { createUser } from "../api/userApi";
 import socket from "../socket";
 
@@ -26,6 +28,31 @@ export default function JoinPlayground() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // ─── Random Username Generator ───
+  const adjectives = [
+    "Silent", "Cosmic", "Neon", "Shadow", "Golden", "Frosty", "Blazing", "Mystic",
+    "Electric", "Velvet", "Quantum", "Lunar", "Solar", "Phantom", "Turbo", "Pixel",
+    "Echo", "Nova", "Rogue", "Stealth", "Wild", "Rapid", "Dream", "Storm", "Vivid"
+  ];
+
+  const nouns = [
+    "Panda", "Waffle", "Falcon", "Raven", "Tiger", "Phoenix", "Dragon", "Ninja",
+    "Wizard", "Knight", "Samurai", "Pirate", "Ghost", "Shadow", "Bolt", "Spark",
+    "Vortex", "Blaze", "Frost", "Echo", "Nova", "Pulse", "Rift", "Surge", "Zenith"
+  ];
+
+  const generateUsername = () => {
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const number = Math.floor(Math.random() * 900) + 10; // 10–909
+    return `${adj}${noun}${number}`;
+  };
+
+  // Generate username once when component mounts
+  useEffect(() => {
+    setUsername(generateUsername());
+  }, []);
 
   // ─── OTP logic ───
   const codeLength = 6;
@@ -154,7 +181,7 @@ export default function JoinPlayground() {
               Join Playground
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              Enter your username and the 6-digit code
+              Enter the 6-digit code to join
             </Typography>
           </Box>
 
@@ -164,27 +191,63 @@ export default function JoinPlayground() {
             </Alert>
           )}
 
-          {/* Username */}
-          <TextField
-            fullWidth
-            label="Your Username"
-            variant="outlined"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            onKeyDown={handleKeyPress}
-            disabled={loading}
-            autoFocus
-            placeholder="e.g. DesmondTheCoder"
-            helperText="This will be visible to others in the room"
-            FormHelperTextProps={{ sx: { mt: 1, fontSize: "0.8rem" } }}
-            sx={{
-              mb: 4,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                bgcolor: "background.default",
-              },
-            }}
-          />
+          {/* Generated Username Display */}
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              sx={{ fontWeight: 600, mb: 1.5 }}
+            >
+              Your Display Name
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              <Chip
+                label={username || "Generating..."}
+                color="primary"
+                variant="outlined"
+                size="medium"
+                sx={{
+                  fontSize: "1.1rem",
+                  py: 2.5,
+                  px: 3,
+                  height: "auto",
+                  borderRadius: 3,
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  borderWidth: 2,
+                  "& .MuiChip-label": { px: 2 },
+                }}
+              />
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<RefreshIcon />}
+                onClick={() => setUsername(generateUsername())}
+                disabled={loading}
+                sx={{
+                  borderRadius: 3,
+                  textTransform: "none",
+                }}
+              >
+                Another Name
+              </Button>
+            </Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 1.5, fontSize: "0.85rem" }}
+            >
+              This will be visible to others in the room
+            </Typography>
+          </Box>
 
           {/* OTP Input */}
           <Typography
@@ -216,6 +279,8 @@ export default function JoinPlayground() {
                 variant="outlined"
                 inputProps={{
                   maxLength: 1,
+                  inputMode: "numeric",
+                  pattern: "[0-9]*",
                   style: {
                     textAlign: "center",
                     fontSize: "1.75rem",
