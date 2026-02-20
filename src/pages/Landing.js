@@ -6,6 +6,7 @@ import {
   Typography,
   Paper,
   alpha,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +16,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 export default function Landing() {
   const navigate = useNavigate();
   const theme = useTheme();
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
     <Box
@@ -30,7 +31,7 @@ export default function Landing() {
     >
       <Container maxWidth="xs">
         <Paper
-          elevation={6}
+          elevation={isMobile ? 0 : 3}
           sx={{
             p: { xs: 4, sm: 5 },
             borderRadius: 4,
@@ -46,7 +47,9 @@ export default function Landing() {
               left: 0,
               right: 0,
               height: "4px",
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+              background: isMobile
+                ? ""
+                : `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
             },
           }}
         >

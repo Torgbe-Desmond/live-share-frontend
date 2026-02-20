@@ -10,6 +10,7 @@ import {
   alpha,
   useTheme,
   Container,
+  useMediaQuery,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import KeyIcon from "@mui/icons-material/Key";
@@ -24,6 +25,7 @@ export default function JoinPlayground() {
 
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // ─── OTP logic ───
   const codeLength = 6;
@@ -107,7 +109,7 @@ export default function JoinPlayground() {
     >
       <Container maxWidth="xs">
         <Paper
-          elevation={6}
+          elevation={isMobile ? 0 : 3}
           sx={{
             p: { xs: 4, sm: 5 },
             borderRadius: 4,
@@ -122,7 +124,9 @@ export default function JoinPlayground() {
               left: 0,
               right: 0,
               height: "4px",
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+              background: isMobile
+                ? ""
+                : `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
             },
           }}
         >

@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Anon Fun",
+  "name": "Send anonymous messages to your friends and family",
   "icons": [
     {
       "src": "favicon.ico",

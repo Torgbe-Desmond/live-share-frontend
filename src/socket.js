@@ -1,7 +1,8 @@
 // src/socket.js
 import { io } from "socket.io-client";
+const BASE_URL = ["https://live-share-5bkp.onrender.com","http://localhost:5000"][0];
 
-const socket = io("https://live-share-5bkp.onrender.com", {
+const socket = io(BASE_URL, {
   withCredentials: true,
 });
 

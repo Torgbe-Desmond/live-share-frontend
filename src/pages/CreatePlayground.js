@@ -10,6 +10,7 @@ import {
   alpha,
   useTheme,
   Container,
+  useMediaQuery,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -23,6 +24,7 @@ export default function CreatePlayground() {
 
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleCreate = async () => {
     if (!username.trim()) return;
@@ -70,7 +72,7 @@ export default function CreatePlayground() {
     >
       <Container maxWidth="xs">
         <Paper
-          elevation={6}
+          elevation={isMobile ? 0 : 3}
           sx={{
             p: { xs: 4, sm: 5 },
             borderRadius: 4,
@@ -85,7 +87,9 @@ export default function CreatePlayground() {
               left: 0,
               right: 0,
               height: "4px",
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+              background: isMobile
+                ? ""
+                : `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
             },
           }}
         >
