@@ -20,7 +20,7 @@ export default function MessageInput({
   };
 
   return (
-    <Box>
+    <Box sx={{ pb: os === "iOS" ? 3 : 1.5 }}>
       <input
         type="file"
         multiple
@@ -62,7 +62,6 @@ export default function MessageInput({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          pb: os === "iOS" ? 3 : 1.5,
         }}
       >
         <TextField

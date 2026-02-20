@@ -15,7 +15,7 @@ export const ThemeProviderWrapper = ({ children }) => {
     if (themeMode === ThemeMode.DARK) return AppDarkTheme;
 
     // SYSTEM mode
-    return prefersDark ? AppDarkTheme : defaultTheme;
+    return prefersDark ? defaultTheme : defaultTheme;
   }, [themeMode, prefersDark]);
 
   useEffect(() => {
