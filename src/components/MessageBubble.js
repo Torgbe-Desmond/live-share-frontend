@@ -7,7 +7,7 @@ import {
   alpha,
   IconButton,
 } from "@mui/material";
-import ReplyIcon from '@mui/icons-material/Reply';
+import ReplyIcon from "@mui/icons-material/Reply";
 export default function MessageBubble({ msg, senderId, onReply }) {
   const isOwn = msg.senderId === senderId;
 
@@ -66,13 +66,27 @@ export default function MessageBubble({ msg, senderId, onReply }) {
               }}
             >
               <Typography variant="caption">{msg.replyTo.username}</Typography>
-              <Typography variant="body2" noWrap>
+              <Typography
+                variant="body2"
+                sx={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  overflowWrap: "anywhere",
+                }}
+              >
                 {msg.replyTo.content}
               </Typography>
             </Box>
           )}
 
-          <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
+          <Typography
+            variant="body1"
+            sx={{
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              overflowWrap: "anywhere",
+            }}
+          >
             {msg.content}
           </Typography>
           {msg.files?.map((url, i) => (
@@ -93,7 +107,7 @@ export default function MessageBubble({ msg, senderId, onReply }) {
             }}
             onClick={() => onReply(msg)}
           >
-            <ReplyIcon/>
+            <ReplyIcon />
           </IconButton>
         </Paper>
       </Box>

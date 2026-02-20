@@ -28,7 +28,7 @@ export default function MessageInput({
         ref={fileInputRef}
         onChange={(e) => {
           /* parent handles this */
-        }}
+        }}  
       />
 
       {replyingTo && (
