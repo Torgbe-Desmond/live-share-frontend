@@ -1,20 +1,11 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useMediaQuery, ThemeProvider, CssBaseline } from "@mui/material";
 
 import { ThemeMode } from "./Constants";
 import {
   AppDarkTheme,
   AppLightTheme,
-  AppSolarizedTheme,
-  AppDraculaTheme,
-  AppOneDarkTheme,
-  AppPalenightTheme,
-  AppMonokaiTheme,
-  AppNordTheme,
-  AppGruvboxDarkTheme,
-  AppSilverTheme,
   defaultTheme,
-  AppDarkDefaultTheme
 } from "./Themes";
 import { ThemeContext } from "./Context";
 import { updateBodyClassesAndMeta } from "./Utils";

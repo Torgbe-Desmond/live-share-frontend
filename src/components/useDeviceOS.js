@@ -1,11 +1,6 @@
-import { useMediaQuery, useTheme } from '@mui/material';
 import { useMemo } from 'react';
 
 export default function useDeviceOS() {
-  const theme = useTheme();
-  
-  // Optional: you can also combine with screen size heuristics
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const os = useMemo(() => {
     const ua = navigator.userAgent || navigator.vendor || window.opera;

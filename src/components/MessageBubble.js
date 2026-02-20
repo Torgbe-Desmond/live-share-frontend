@@ -6,7 +6,6 @@ import {
   Avatar,
   alpha,
   IconButton,
-  Button,
 } from "@mui/material";
 import ReplyIcon from '@mui/icons-material/Reply';
 export default function MessageBubble({ msg, senderId, onReply }) {

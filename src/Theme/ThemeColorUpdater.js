@@ -3,7 +3,7 @@ import { useAppTheme } from "./Context"; // your context hook
 import { useMediaQuery } from "@mui/material";
 
 export default function ThemeColorUpdater() {
-  const { themeMode, ThemeMode } = useAppTheme();
+  const { themeMode } = useAppTheme();
 
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
 

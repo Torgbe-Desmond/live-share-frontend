@@ -1,8 +1,7 @@
-import { Box, useMediaQuery } from "@mui/material";
+import { Box } from "@mui/material";
 import OnlineUsersList from "./OnlineUsersList";
 import LeaveRoomButton from "./LeaveRoomButton";
 import useDeviceOS from "./useDeviceOS";
-import {  useState } from "react";
 
 export default function SidebarContent({ users, username, onLeaveRoom }) {
 
