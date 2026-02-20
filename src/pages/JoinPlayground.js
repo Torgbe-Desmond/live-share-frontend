@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Button,
@@ -30,30 +30,81 @@ export default function JoinPlayground() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // ─── Random Username Generator ───
-  const adjectives = [
-    "Silent", "Cosmic", "Neon", "Shadow", "Golden", "Frosty", "Blazing", "Mystic",
-    "Electric", "Velvet", "Quantum", "Lunar", "Solar", "Phantom", "Turbo", "Pixel",
-    "Echo", "Nova", "Rogue", "Stealth", "Wild", "Rapid", "Dream", "Storm", "Vivid"
-  ];
 
-  const nouns = [
-    "Panda", "Waffle", "Falcon", "Raven", "Tiger", "Phoenix", "Dragon", "Ninja",
-    "Wizard", "Knight", "Samurai", "Pirate", "Ghost", "Shadow", "Bolt", "Spark",
-    "Vortex", "Blaze", "Frost", "Echo", "Nova", "Pulse", "Rift", "Surge", "Zenith"
-  ];
+  const nouns = useMemo(
+    () => [
+      "Panda",
+      "Waffle",
+      "Falcon",
+      "Raven",
+      "Tiger",
+      "Phoenix",
+      "Dragon",
+      "Ninja",
+      "Wizard",
+      "Knight",
+      "Samurai",
+      "Pirate",
+      "Ghost",
+      "Shadow",
+      "Bolt",
+      "Spark",
+      "Vortex",
+      "Blaze",
+      "Frost",
+      "Echo",
+      "Nova",
+      "Pulse",
+      "Rift",
+      "Surge",
+      "Zenith",
+    ],
+    [],
+  );
 
-  const generateUsername = () => {
+  const adjectives = useMemo(
+    () => [
+      "Silent",
+      "Cosmic",
+      "Neon",
+      "Shadow",
+      "Golden",
+      "Frosty",
+      "Blazing",
+      "Mystic",
+      "Electric",
+      "Velvet",
+      "Quantum",
+      "Lunar",
+      "Solar",
+      "Phantom",
+      "Turbo",
+      "Pixel",
+      "Echo",
+      "Nova",
+      "Rogue",
+      "Stealth",
+      "Wild",
+      "Rapid",
+      "Dream",
+      "Storm",
+      "Vivid",
+    ],
+    [],
+  );
+
+  // Memoize the generator function
+  const generateUsername = useCallback(() => {
     const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
     const noun = nouns[Math.floor(Math.random() * nouns.length)];
-    const number = Math.floor(Math.random() * 900) + 10; // 10–909
+    const number = Math.floor(Math.random() * 900) + 10;
     return `${adj}${noun}${number}`;
-  };
+  }, [adjectives, nouns]); // ← empty deps = function is created only once
 
-  // Generate username once when component mounts
+  // Generate once on mount
   useEffect(() => {
     setUsername(generateUsername());
-  }, []);
-
+  }, [generateUsername]); // ← depend on the memoized function
   // ─── OTP logic ───
   const codeLength = 6;
   const inputRefs = useRef([]);
