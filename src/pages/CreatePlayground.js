@@ -79,11 +79,11 @@ export default function CreatePlayground() {
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleCreate();
-    }
-  };
+  // const handleKeyPress = (e) => {
+  //   if (e.key === "Enter") {
+  //     handleCreate();
+  //   }
+  // };
 
   return (
     <Box

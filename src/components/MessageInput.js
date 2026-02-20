@@ -1,7 +1,6 @@
 import { Box, TextField, IconButton, Typography } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import useDeviceOS from "./useDeviceOS";
-import SoundMenu from "./SoundMenu";
 
 export default function MessageInput({
   message,

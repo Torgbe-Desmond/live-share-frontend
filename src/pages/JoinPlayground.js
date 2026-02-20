@@ -117,11 +117,11 @@ export default function JoinPlayground() {
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && code.length === codeLength && username.trim()) {
-      handleJoin();
-    }
-  };
+  // const handleKeyPress = (e) => {
+  //   if (e.key === "Enter" && code.length === codeLength && username.trim()) {
+  //     handleJoin();
+  //   }
+  // };
 
   return (
     <Box
