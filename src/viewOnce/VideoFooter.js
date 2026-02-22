@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Box,
   IconButton,
@@ -11,6 +10,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import { alpha } from "@mui/material/styles";
+
 
 export default function VideoFooter({
   toggleMute,
