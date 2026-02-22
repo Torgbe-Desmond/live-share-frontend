@@ -1,7 +1,10 @@
 // src/api/userApi.js
+const API_BASE =
+  process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
+    ? "https://live-share-5bkp.onrender.com"
+    : "http://127.20.10.2:5000";
 
-const BASE_URL = ["https://live-share-5bkp.onrender.com/api/users","http://localhost:5000/api/users"][0];
-
+const BASE_URL = `${API_BASE}/api/users`;
 /**
  * Create a new user
  */

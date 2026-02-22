@@ -12,7 +12,6 @@ import {
 import PeopleIcon from "@mui/icons-material/People";
 
 export default function OnlineUsersList({ users, currentUsername }) {
-    console.log("Rendering OnlineUsersList with users:", users, "and currentUsername:", currentUsername);
   return (
     <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
       <Typography

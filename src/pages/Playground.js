@@ -13,17 +13,19 @@ import { useNavigate } from "react-router-dom";
 import socket from "../socket";
 import SidebarContent from "../components/SidebarContent";
 import ChatHeader from "../components/ChatHeader";
-import MessageBubble from "../components/MessageBubble";
-import MessageInput from "../components/MessageInput";
+import MessageBubble from "../components/messaging/MessageBubble";
+import MessageInput from "../components/messaging/MessageInput";
+import { uploadFile } from "../api/fileApi";
+import useSocketListeners from "../components/useSocketListeners";
 
 export default function Playground() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState(new Set());
   const [senderId, setSenderId] = useState(null);
   const [roomName, setRoomName] = useState(null);
   const [username, setUsername] = useState(null);
-  const [users, setUsers] = useState(new Set()); // usernames only (strings)
+  const [users, setUsers] = useState(new Set());
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [leftMessage, setLeftMessage] = useState("");
   const [joinedMessage, setJoinedMessage] = useState("");
@@ -31,11 +33,51 @@ export default function Playground() {
   const fileInputRef = useRef(null);
   const bottomRef = useRef(null);
   const navigate = useNavigate();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const [isActive, setIsActive] = useState(true);
+  const messageRefs = useRef(new Map());
   // ─── Load stored data & join room ───────────────────────────────
+
+  useEffect(() => {
+    const handleDisconnect = (reason) => {
+      setIsActive(false);
+      // console.log("Socket disconnected:", reason);
+      // Reason can be: "io server disconnect", "io client disconnect", "ping timeout", etc.
+    };
+
+    const handleConnect = () => {
+      const storedUserId = localStorage.getItem("userId");
+      const storedRoomName = localStorage.getItem("roomName");
+      const storedUsername = localStorage.getItem("username");
+
+      socket.emit("joinRoom", {
+        roomName: storedRoomName,
+        userId: storedUserId,
+        username: storedUsername, 
+      });
+      
+      setIsActive(true);
+
+    };
+
+    const handleReconnectAttempt = (attempt) => {
+      // console.log("Reconnecting attempt:", attempt);
+    };
+
+    // Listen to socket events
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect", handleConnect);
+    socket.on("reconnect_attempt", handleReconnectAttempt);
+
+    // Clean up on unmount
+    return () => {
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect", handleConnect);
+      socket.off("reconnect_attempt", handleReconnectAttempt);
+    };
+  }, []);
+
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     const storedRoomName = localStorage.getItem("roomName");
@@ -54,51 +96,14 @@ export default function Playground() {
     }
   }, []);
 
-  useEffect(() => {
-    const handleReceiveMessage = (data) => {
-      if (data.senderId !== senderId?.toString()) {
-        setMessages((prev) => [...prev, data]);
-      }
-      const sum = { userId: data.senderId, username: data.username };
-      handleUserJoin(sum);
-    };
-
-    const handleUserLeft = (data) => {
-      if (data.username) {
-        setUsers((prevUsers) => {
-          if (!prevUsers.has(data.username)) return prevUsers;
-
-          const updatedUsers = new Set(prevUsers);
-          updatedUsers.delete(data.username);
-          setLeftMessage(`${data.username} has left the room`);
-          return updatedUsers;
-        });
-      }
-    };
-
-    const handleUserJoin = (data) => {
-      if (data.userId === senderId) return;
-
-      if (data?.username) {
-        setUsers((prev) => {
-          if (prev.has(data.username)) return prev;
-          return new Set([...prev, data.username]);
-        });
-
-        setJoinedMessage(`${data.username} has joined the room`);
-      }
-    };
-
-    socket.on("receiveMessage", handleReceiveMessage);
-    socket.on("userLeft", handleUserLeft);
-    socket.on("userJoined", handleUserJoin);
-
-    return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-      socket.off("userLeft", handleUserLeft);
-      socket.off("userJoined", handleUserJoin); // ✅ important
-    };
-  }, [senderId]);
+  useSocketListeners(
+    senderId,
+    setMessages,
+    users,
+    setUsers,
+    setLeftMessage,
+    setJoinedMessage,
+  );
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -106,28 +111,119 @@ export default function Playground() {
   }, [messages]);
 
   // ─── Actions ────────────────────────────────────────────────────
-  const handleSend = () => {
-    if (!senderId || !roomName) return;
-    if (!message.trim() && selectedFiles.length === 0) return;
 
-    const messageObject = {
+  // Upload function per file or just text
+  const uploadFileHandler = async (formData, localMessageId = null) => {
+    try {
+      const { success, data: backendMessage } = await uploadFile(formData);
+
+      if (success && localMessageId) {
+        // Replace the local message draft with the backend message
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.messageId === localMessageId ? backendMessage : msg,
+          ),
+        );
+      }
+    } catch (err) {
+      if (localMessageId) {
+        // Mark files in the local draft as failed
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => {
+            if (msg.messageId === localMessageId) {
+              return {
+                ...msg,
+                files: msg.files.map((f) => ({
+                  ...f,
+                  isFailed: true,
+                })),
+              };
+            }
+            return msg;
+          }),
+        );
+      }
+    }
+  };
+
+  const markFileAsViewed = (messageId, filePublicId) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) => {
+        if (msg.id !== messageId) return msg; // you'll need a unique msg.id
+
+        return {
+          ...msg,
+          files: msg.files?.map((f) =>
+            f.publicId === filePublicId ? { ...f, viewed: true } : f,
+          ),
+        };
+      }),
+    );
+  };
+  // Optional: emit socket event so sender knows it was viewed
+  // socket.emit("mediaViewed", { messageId, filePublicId, roomName });
+
+  const handleSend = async () => {
+    if (!senderId || !roomName) return;
+    if (!message.trim() && selectedFiles.size === 0) return;
+
+    const selectedFile = [...selectedFiles][0]; // only one
+
+    const messageId = Date.now();
+    const targetId = messageId.toString();
+    // Local UI object
+    const localMessageObject = {
+      messageId: targetId,
       content: message.trim(),
       senderId,
       roomName,
       username,
       replyTo: replyingTo
         ? {
-            content: replyingTo?.content,
-            username: replyingTo?.username,
+            messageId: replyingTo.messageId || "",
+            content: replyingTo.content,
+            username: replyingTo.username,
+            files: replyingTo?.files ? replyingTo?.files : [],
           }
         : null,
+      files: selectedFile ? [selectedFile] : [],
     };
 
-    setMessages((prev) => [...prev, messageObject]);
-    socket.emit("sendMessage", messageObject);
+    setMessages((prev) => [...prev, localMessageObject]);
 
+    // Payload to server
+    const formData = new FormData();
+    formData.append("content", message.trim());
+    formData.append("senderId", senderId);
+    formData.append("roomName", roomName);
+    formData.append("username", username);
+    formData.append("messageId", messageId.toString());
+
+    if (selectedFile) {
+      formData.append("file", selectedFile.file);
+    }
+
+    if (replyingTo) {
+      formData.append(
+        "replyTo",
+        JSON.stringify({
+          content: replyingTo.content,
+          username: replyingTo.username,
+          files: replyingTo.files || [],
+          messageId: replyingTo.messageId,
+        }),
+      );
+    }
+
+    setSelectedFiles(new Set());
+
+    await uploadFileHandler(
+      formData,
+      localMessageObject.messageId,
+      replyingTo ? true : false,
+    );
+    // Clear state
     setMessage("");
-    setSelectedFiles([]);
     setReplyingTo(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -175,6 +271,7 @@ export default function Playground() {
           usersCount={users.size}
           isMobile={isMobile}
           onMenuClick={() => setMobileDrawerOpen(true)}
+          isActive={isActive}
         />
 
         {/* Messages list */}
@@ -186,6 +283,7 @@ export default function Playground() {
             p: 2,
             pb: 3,
             display: "flex",
+            cursor: "pointer",
             flexDirection: "column",
           }}
         >
@@ -196,6 +294,23 @@ export default function Playground() {
                 msg={msg}
                 senderId={senderId}
                 onReply={setReplyingTo}
+                onMediaViewed={(filePublicId) =>
+                  markFileAsViewed(msg.messageId, filePublicId)
+                }
+                onClicReply={(replyMsg) => {
+                  if (replyMsg.replyTo?.messageId) {
+                    const originalRef = messageRefs.current.get(
+                      replyMsg.replyTo.messageId,
+                    );
+                    originalRef?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }
+                }}
+                ref={(el) => {
+                  if (el) messageRefs.current.set(msg.messageId, el);
+                }}
               />
             ))}
             <div ref={bottomRef} />
@@ -208,13 +323,16 @@ export default function Playground() {
           setMessage={setMessage}
           onSend={handleSend}
           fileInputRef={fileInputRef}
-          selectedFilesCount={selectedFiles.length}
+          selectedFilesCount={selectedFiles.size}
           replyingTo={replyingTo}
           setReplyingTo={setReplyingTo}
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
         />
 
         {/* Notifications */}
         <Snackbar
+          sx={{ marginTop: 1 }}
           open={Boolean(leftMessage)}
           autoHideDuration={4000}
           onClose={() => setLeftMessage("")}

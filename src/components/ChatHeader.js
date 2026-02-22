@@ -9,6 +9,7 @@ export default function ChatHeader({
   usersCount,
   isMobile,
   onMenuClick,
+  isActive,
 }) {
   const [copied, setCopied] = useState("");
   return (
@@ -31,7 +32,7 @@ export default function ChatHeader({
           </IconButton>
         )}
 
-        <Typography
+        {/* <Typography
           variant="h6"
           color="text.secondary"
           fontWeight={700}
@@ -39,7 +40,7 @@ export default function ChatHeader({
           sx={{ letterSpacing: "-0.02em" }}
         >
           Playground
-        </Typography>
+        </Typography> */}
         {roomName && (
           <Tooltip
             title={copied ? "Copied!" : "Click to copy room code"}
@@ -81,7 +82,7 @@ export default function ChatHeader({
                 },
               }}
             >
-             {roomName}
+              {roomName}
               <ContentCopyIcon
                 fontSize="inherit"
                 sx={{
@@ -105,15 +106,17 @@ export default function ChatHeader({
         >
           <Box
             sx={{
-              width: 8,
-              height: 8,
+              width: 12,
+              height: 12,
               borderRadius: "50%",
-              bgcolor: "success.main",
-              boxShadow: "0 0 0 3px rgba(76,175,80,0.2)",
+              bgcolor: isActive ? "success.main" : "error.light",
+              boxShadow: isActive
+                ? "0 0 0 4px alpha('success.main', 0.24)"
+                : "0 0 0 4px alpha('error.main', 0.16)",
             }}
           />
           <Typography variant="body2" fontWeight={500}>
-            {usersCount} live
+          { isActive ? "online" : "offline"}
           </Typography>
         </Box>
       </Toolbar>

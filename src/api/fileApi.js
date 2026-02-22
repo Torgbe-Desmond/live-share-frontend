@@ -1,0 +1,40 @@
+const API_BASE =
+  process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
+    ? "https://live-share-5bkp.onrender.com"
+    : "http://127.20.10.2:5000";
+
+const BASE_URL = `${API_BASE}/api/messages`;
+
+export async function uploadFile(formData) {
+  if (!formData) {
+    return { success: false, error: "No file selected" };
+  }
+
+  try {
+    const response = await fetch(BASE_URL, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error("Invalid server response");
+    }
+
+    if (!response.ok) {
+      throw new Error(result?.error || `Upload failed: ${response.status}`);
+    }
+
+
+    return { success: true, data: result.data };
+  } catch (error) {
+    console.error("Upload error:", error);  
+    return {
+      success: false,
+      error: error.message || "Failed to upload file. Please try again.",
+    };
+  }
+}
