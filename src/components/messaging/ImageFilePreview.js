@@ -1,13 +1,13 @@
 import { Box, IconButton, Tooltip } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+// import VisibilityIcon from "@mui/icons-material/Visibility";
+// import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function ImageFilePreview({
   file,
   onRemove,
   isViewOnce = false,
-  onToggleViewOnce,
+  // onToggleViewOnce,
 }) {
   return (
     <Box sx={{ position: "relative", flexShrink: 0 }}>

@@ -31,10 +31,10 @@ export default function VideoFooter({
     return `${min}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const progress = useMemo(
-    () => (duration > 0 ? (currentTime / duration) * 100 : 0),
-    [currentTime, duration]
-  );
+  // const progress = useMemo(
+  //   () => (duration > 0 ? (currentTime / duration) * 100 : 0),
+  //   [currentTime, duration]
+  // );
 
 //   .footer-wrapper {
 //     position: absolute;

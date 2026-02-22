@@ -14,26 +14,25 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
       }}
     >
       {replyingTo.files?.length > 0 &&
-        replyingTo?.files.map((file) => {
-          if (!file.local) {
-            return (
-              <Box
-                component="img"
-                src={file.path}
-                controls
-                muted
-                sx={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 2,
-                  display: "block",
-                  bgcolor: "black",
-                  mr:1
-                }}
-              />
-            );
-          }
-        })}
+        replyingTo.files
+          .filter((file) => !file.local) // only keep non-local files
+          .map((file) => (
+            <Box
+              key={file.path} // ← add key (important when rendering lists)
+              component="img"
+              src={file.path}
+              controls
+              muted
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: 2,
+                display: "block",
+                bgcolor: "black",
+                mr: 1,
+              }}
+            />
+          ))}
 
       <Box sx={{ flex: 1, mr: 1 }}>
         <Typography variant="subtitle2" color="text.secondary">
