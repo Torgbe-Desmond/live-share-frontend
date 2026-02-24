@@ -22,7 +22,6 @@ export default function SidebarContent({ users, username, onLeaveRoom, roomName 
     >
       <OnlineUsersList users={users} currentUsername={username} />
 
-
       <RoomClipboard roomName={roomName}/>
       <LeaveRoomButton onLeave={onLeaveRoom} />
     </Box>

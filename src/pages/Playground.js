@@ -7,9 +7,6 @@ import {
   Alert,
   useMediaQuery,
   useTheme,
-  Slide,
-  Button,
-  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -20,8 +17,7 @@ import MessageBubble from "../components/messaging/MessageBubble";
 import MessageInput from "../components/messaging/MessageInput";
 import { uploadFile } from "../api/fileApi";
 import useSocketListeners from "../components/useSocketListeners";
-// import WifiOffIcon from "@mui/icons-material/WifiOff";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import ReconnectionSlide from "../components/slides/ReconnectionSlide";
 
 export default function Playground() {
   const [message, setMessage] = useState("");
@@ -305,8 +301,7 @@ export default function Playground() {
         <Box sx={{ display: { xs: "none", md: "block" } }}>
           <SidebarContent
             users={users}
-                        roomName={roomName}
-
+            roomName={roomName}
             username={username}
             onLeaveRoom={handleLeaveRoom}
           />
@@ -316,8 +311,6 @@ export default function Playground() {
       {/* Main chat area */}
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <ChatHeader
-          roomName={roomName}
-          usersCount={users.size}
           isMobile={isMobile}
           onMenuClick={() => setMobileDrawerOpen(true)}
           isActive={isActive}
@@ -374,56 +367,15 @@ export default function Playground() {
         />
 
         {/* Reconnect button – only hides on real success */}
-        <Slide
-          direction="up"
-          in={showReconnect && !isActive}
-          mountOnEnter
-          unmountOnExit
-        >
-          <Box
-            sx={{
-              position: "fixed",
-              bottom: 92,
-              left:isMobile ? "12%" : "50%",
-              transform: "translateX(-50%)",
-              zIndex: 1250,
-              mb: 2,
-            }}
-          >
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={
-                isReconnecting ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <RefreshIcon />
-                )
-              }
-              disabled={isReconnecting}
-              onClick={attemptReconnect}
-              sx={{
-                minWidth: 220,
-                borderRadius: 50,
-                px: 4,
-                py: 1.5,
-                boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
-                textTransform: "none",
-                fontSize: "1.05rem",
-                fontWeight: 600,
-                gap: 1.5,
-              }}
-            >
-              {isReconnecting
-                ? retryCount <= 1
-                  ? "Connecting..."
-                  : `Retrying (${retryCount})...`
-                : retryCount === 0
-                  ? `Reconnect${roomName ? ` to ${roomName}` : ""}`
-                  : `Retry connection (${retryCount})`}
-            </Button>
-          </Box>
-        </Slide>
+        <ReconnectionSlide
+          showReconnect={showReconnect}
+          isActive={isActive}
+          attemptReconnect={attemptReconnect}
+          isReconnecting={isReconnecting}
+          retryCount={retryCount}
+          roomName={roomName}
+        />
+
 
         {/* Notifications */}
         <Snackbar

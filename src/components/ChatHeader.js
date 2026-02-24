@@ -1,13 +1,7 @@
 import { Box, IconButton, AppBar, Toolbar, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
-export default function ChatHeader({
-  roomName,
-  usersCount,
-  isMobile,
-  onMenuClick,
-  isActive,
-}) {
+export default function ChatHeader({ isMobile, onMenuClick, isActive }) {
   return (
     <AppBar
       position="static"
@@ -20,10 +14,17 @@ export default function ChatHeader({
     >
       <Toolbar
         variant="dense"
-        sx={{ minHeight: 56, px: { xs: 2, sm: 3 }, gap: 2 }}
+        sx={{
+          minHeight: 56,
+          px: { xs: 2, sm: 3 },
+          gap: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
       >
         {isMobile && (
-          <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 1 }}>
+          <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 0 }}>
             <MenuIcon />
           </IconButton>
         )}
@@ -38,13 +39,13 @@ export default function ChatHeader({
           Playground
         </Typography> */}
 
-        <Box sx={{ flex: 1 }} />
-
+        {!isMobile && <Box sx={{ flex: 1 }} />}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 1,
+            // justifyContent: !isMobile && "flex-end",
             color: "text.secondary",
           }}
         >
