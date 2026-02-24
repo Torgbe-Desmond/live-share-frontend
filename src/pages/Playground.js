@@ -262,11 +262,10 @@ export default function Playground() {
     }
 
     setSelectedFiles(new Set());
+    setReplyingTo(null);
+    setMessage("");
 
     await uploadFileHandler(formData, messageId);
-
-    setMessage("");
-    setReplyingTo(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -375,7 +374,6 @@ export default function Playground() {
           retryCount={retryCount}
           roomName={roomName}
         />
-
 
         {/* Notifications */}
         <Snackbar
