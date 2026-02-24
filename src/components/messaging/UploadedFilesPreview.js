@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { useState } from "react";
 import ImageFilePreview from "./ImageFilePreview";
 import VideoFilePreview from "./VideoFilePreview";
+import OtherFilePreview from "./OtherFilePreview";
 
 export default function UploadedFilesPreview({
   selectedFiles,
@@ -37,7 +38,6 @@ export default function UploadedFilesPreview({
 
   if (!selectedFiles || selectedFiles.size === 0) return null;
 
-
   return (
     <Box
       sx={{
@@ -60,7 +60,7 @@ export default function UploadedFilesPreview({
             isViewOnce={!!viewOnceMap[file.publicId]}
             onToggleViewOnce={toggleViewOnce}
           />
-        ) : (
+        ) : file.type?.startsWith("image/") ? (
           <ImageFilePreview
             key={file.publicId}
             file={file}
@@ -68,7 +68,14 @@ export default function UploadedFilesPreview({
             isViewOnce={!!viewOnceMap[file.publicId]}
             onToggleViewOnce={toggleViewOnce}
           />
-        )
+        ) : (
+          <OtherFilePreview 
+            key={file.publicId}
+            file={file}
+            onRemove={handleRemove}
+            isViewOnce={!!viewOnceMap[file.publicId]}
+          />
+        ),
       )}
     </Box>
   );

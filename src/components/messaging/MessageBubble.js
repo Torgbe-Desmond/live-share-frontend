@@ -17,6 +17,7 @@ import { forwardRef, useEffect, useRef, useState } from "react";
 import FilePreview from "./FilePreview";
 import VideoPreview from "./VideoPreview";
 import Video from "../../viewOnce/Video";
+import GenericFilePreview from "./GenericFilePreview";
 
 const MessageBubble = forwardRef(
   ({ msg, senderId, onReply, onMediaViewed, onClicReply }, ref) => {
@@ -152,7 +153,7 @@ const MessageBubble = forwardRef(
                           mb: 0.5,
                         }}
                       />
-                    ) : null
+                    ) : null,
                   )}
 
                 <Typography variant="caption" fontWeight={600}>
@@ -189,6 +190,7 @@ const MessageBubble = forwardRef(
               const publicId = file.publicId;
               const isRevealed = revealedFiles[publicId];
               const isViewed = viewedFiles[publicId] || !!file.viewed;
+              const isImage = file.type?.startsWith("image/");
 
               if (!isOwn && isViewOnce) {
                 if (isViewed) {
@@ -283,11 +285,22 @@ const MessageBubble = forwardRef(
                 );
               }
 
+              if (isImage) {
+                return (
+                  <FilePreview
+                    key={publicId || index}
+                    file={file}
+                    restrictedViewOnce={false}
+                    onViewed={() => isViewOnce && onMediaViewed?.(publicId)}
+                  />
+                );
+              }
+
               return (
-                <FilePreview
+                <GenericFilePreview
                   key={publicId || index}
                   file={file}
-                  restrictedViewOnce={false}
+                  restrictedViewOnce={isViewOnce}
                   onViewed={() => isViewOnce && onMediaViewed?.(publicId)}
                 />
               );
@@ -329,7 +342,7 @@ const MessageBubble = forwardRef(
         </Box>
       </ListItem>
     );
-  }
+  },
 );
 
 export default MessageBubble;

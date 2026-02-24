@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import ReplyPreview from "./ReplyPreview";
 import UploadedFilesPreview from "./UploadedFilesPreview";
 import MessageControls from "./MessageControls";
+// import { ChatDemo } from "./DockedChatWindows";
 
 export default function MessageInput(props) {
   const {
@@ -9,7 +10,7 @@ export default function MessageInput(props) {
     replyingTo,
     setReplyingTo,
     setSelectedFiles,
-    selectedFiles
+    selectedFiles,
   } = props;
 
   return (
@@ -17,7 +18,7 @@ export default function MessageInput(props) {
       <input type="file" multiple hidden ref={fileInputRef} />
 
       <ReplyPreview replyingTo={replyingTo} setReplyingTo={setReplyingTo} />
-
+      {/* <ChatDemo /> */}
       <UploadedFilesPreview
         setSelectedFiles={setSelectedFiles}
         selectedFiles={selectedFiles}
