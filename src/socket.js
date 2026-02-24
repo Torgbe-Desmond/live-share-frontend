@@ -1,10 +1,6 @@
 // src/socket.js
 import { io } from "socket.io-client";
-
-const API_BASE =
-  process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
-    ? "https://live-share-5bkp.onrender.com"
-    : "http://127.20.10.2:5000";
+import { API_BASE } from "./api/URI";
 
 // You can make this dynamic if needed
 const getSocketOptions = () => {
@@ -19,7 +15,7 @@ const getSocketOptions = () => {
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
     query: {
-      userId: storedUserId || undefined, // will be ignored if undefined
+      userId: storedUserId || undefined, 
       roomName: storedRoomName || undefined,
       username: storedUsername || undefined,
       // you can add anything else you want

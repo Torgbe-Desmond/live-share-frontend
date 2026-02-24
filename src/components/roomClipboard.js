@@ -15,7 +15,6 @@ function RoomClipboard({ roomName }) {
       await navigator.clipboard.writeText(roomName);
       setCopied(true);
       setTooltipOpen(true);
-
       // Reset after 2 seconds
       setTimeout(() => {
         setCopied(false);

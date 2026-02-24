@@ -1,7 +1,4 @@
-const API_BASE =
-  process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
-    ? "https://live-share-5bkp.onrender.com"
-    : "http://127.20.10.2:5000";
+import { API_BASE } from "./URI";
 
 const BASE_URL = `${API_BASE}/api/messages`;
 
