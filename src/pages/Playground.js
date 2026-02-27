@@ -218,8 +218,6 @@ export default function Playground() {
 
     const selectedFile = [...selectedFiles][0];
 
-    console.log("selectedFile", selectedFile);
-
     const messageId = Date.now().toString();
     const localMessageObject = {
       messageId,
@@ -237,8 +235,6 @@ export default function Playground() {
         : null,
       files: selectedFile ? [selectedFile] : [],
     };
-
-    console.log("localMessageObject", localMessageObject);
 
     setMessages((prev) => [...prev, localMessageObject]);
 
@@ -337,9 +333,6 @@ export default function Playground() {
                 senderId={senderId}
                 onReply={setReplyingTo}
                 onMediaViewed={(filePublicId) => {
-                  console.log("messsageID", filePublicId);
-                  console.log("messsageID", msg.messageId);
-
                   markFileAsViewed(msg.messageId, filePublicId);
                 }}
                 onClicReply={(replyMsg) => {

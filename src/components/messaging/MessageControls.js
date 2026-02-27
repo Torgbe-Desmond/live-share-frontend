@@ -46,7 +46,7 @@ export default function MessageControls({
         maxRows={4}
         sx={{
           "& .MuiOutlinedInput-root": {
-            borderRadius: "50px 50px 50px 50px",
+            borderRadius: "20px 20px 20px 20px",
             bgcolor: "background.default",
           },
         }}
