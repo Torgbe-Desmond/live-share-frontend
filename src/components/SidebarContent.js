@@ -3,9 +3,22 @@ import OnlineUsersList from "./OnlineUsersList";
 import LeaveRoomButton from "./LeaveRoomButton";
 import useDeviceOS from "./useDeviceOS";
 import RoomClipboard from "./roomClipboard";
+// import ChatDrawerContent from "./messaging/ChatDrawerContent";
+// import { useState } from "react";
 
-export default function SidebarContent({ users, username, onLeaveRoom, roomName }) {
+export default function SidebarContent({
+  users,
+  username,
+  onLeaveRoom,
+  roomName,
+}) {
   const os = useDeviceOS();
+  // const [open, setOpen] = useState(false);
+
+  // const onClose =()=>{
+  //    setOpen(false)
+  // }
+
   return (
     <Box
       sx={{
@@ -22,7 +35,20 @@ export default function SidebarContent({ users, username, onLeaveRoom, roomName 
     >
       <OnlineUsersList users={users} currentUsername={username} />
 
-      <RoomClipboard roomName={roomName}/>
+      {/* <Drawer
+        anchor="right"
+        open={true}
+        onClose={onClose}
+        PaperProps={{
+          sx: {
+            width: { xs: "100%", sm: 380 },
+            height: "100%",
+          },
+        }}
+      >
+        <ChatDrawerContent onClose={onClose} />
+      </Drawer> */}
+      <RoomClipboard roomName={roomName} />
       <LeaveRoomButton onLeave={onLeaveRoom} />
     </Box>
   );

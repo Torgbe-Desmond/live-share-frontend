@@ -11,7 +11,7 @@ import {
 
 import PeopleIcon from "@mui/icons-material/People";
 
-export default function OnlineUsersList({ users, currentUsername }) {
+export default function OnlineUsersList({ users, currentUsername, setOpen }) {
   return (
     <Box sx={{ flex: 1, overflowY: "auto", p: 2 }}>
       <Typography

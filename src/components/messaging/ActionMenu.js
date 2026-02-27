@@ -5,7 +5,6 @@ import Menu from "@mui/material/Menu";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
-
 export default function ActionMenu({ setSelectedFiles }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const fileInputRef = useRef(null);
@@ -19,7 +18,6 @@ export default function ActionMenu({ setSelectedFiles }) {
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleCloseMenu = () => setAnchorEl(null);
 
- 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -47,8 +45,9 @@ export default function ActionMenu({ setSelectedFiles }) {
       isSuccess: false,
       isFailed: false,
       publicId,
-      viewOnce:false,
-      buffer: arrayBuffer, 
+      viewOnce: true,
+      viewed:false,
+      buffer: arrayBuffer,
     };
 
     // 4️⃣ Add to Set (avoid duplicates)
@@ -65,7 +64,7 @@ export default function ActionMenu({ setSelectedFiles }) {
 
   return (
     <>
-      <IconButton onClick={handleClick}>
+      <IconButton sx={{ border: "1px solid divider" }} onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
 
@@ -95,7 +94,6 @@ export default function ActionMenu({ setSelectedFiles }) {
       />
 
       {/* <SoundDrawer open={drawerOpen} setOpen={setDrawerOpen} /> */}
-   
     </>
   );
 }

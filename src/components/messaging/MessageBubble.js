@@ -5,11 +5,8 @@ import {
   Typography,
   Avatar,
   alpha,
-  IconButton,
-  Tooltip,
   useTheme,
 } from "@mui/material";
-import ReplyIcon from "@mui/icons-material/Reply";
 import LockIcon from "@mui/icons-material/Lock";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { forwardRef, useEffect, useRef, useState } from "react";
@@ -18,6 +15,7 @@ import FilePreview from "./FilePreview";
 import VideoPreview from "./VideoPreview";
 import Video from "../../viewOnce/Video";
 import GenericFilePreview from "./GenericFilePreview";
+import ReplyMenu from "./ReplyMenu";
 
 const MessageBubble = forwardRef(
   ({ msg, senderId, onReply, onMediaViewed, onClicReply }, ref) => {
@@ -306,38 +304,13 @@ const MessageBubble = forwardRef(
               );
             })}
 
-            {/* ── Modern Reply Button ─────────────────────────────────── */}
-            <Tooltip title="Reply" arrow placement="left">
-              <IconButton
-                size="small"
-                onClick={() => onReply(msgRef.current)}
-                sx={{
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                  opacity: showReplyBtn ? 0.9 : 0,
-                  visibility: showReplyBtn ? "visible" : "hidden",
-                  color: isOwn
-                    ? theme.palette.primary.contrastText
-                    : theme.palette.text.secondary,
-                  bgcolor: alpha(theme.palette.background.paper, 0.9),
-                  backdropFilter: "blur(6px)",
-                  boxShadow: theme.shadows[1],
-                  borderRadius: "50%",
-                  transition: "opacity 0.2s ease, transform 0.15s ease",
-                  "&:hover": {
-                    bgcolor: alpha(theme.palette.primary.main, 0.15),
-                    color: theme.palette.primary.main,
-                    transform: "scale(1.15)",
-                  },
-                  "&:active": {
-                    transform: "scale(0.92)",
-                  },
-                }}
-              >
-                <ReplyIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <ReplyMenu
+              msg={msg}
+              senderId={senderId}
+              onReply={onReply}
+              msgRef={msgRef}
+              showReplyBtn={showReplyBtn}
+            />
           </Paper>
         </Box>
       </ListItem>

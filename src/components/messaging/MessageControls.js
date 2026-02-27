@@ -23,9 +23,9 @@ export default function MessageControls({
     <Box
       sx={{
         p: 1.5,
-        borderTop: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
+        // borderTop: "1px solid",
+        // borderColor: "divider",
+        // bgcolor: "background.paper",
         display: "flex",
         alignItems: "center",
         gap: 1,
@@ -42,10 +42,11 @@ export default function MessageControls({
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         multiline
+        elevation={10}
         maxRows={4}
         sx={{
           "& .MuiOutlinedInput-root": {
-            borderRadius: 3,
+            borderRadius: "50px 50px 50px 50px",
             bgcolor: "background.default",
           },
         }}

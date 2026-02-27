@@ -39,6 +39,8 @@ export default function useSocketListeners(
         })),
       };
 
+      console.log("enrichedMessage",enrichedMessage)
+
       if (data.senderId !== senderId?.toString()) {
         setMessages((prev) => [...prev, enrichedMessage]);
       }
