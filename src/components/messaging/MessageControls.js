@@ -29,7 +29,6 @@ export default function MessageControls({
         display: "flex",
         alignItems: "center",
         gap: 1,
-        pb: os === "iOS" ? 3 : 1.5,
       }}
     >
       {/* <ActionMenu setSelectedFiles={setSelectedFiles} /> */}
@@ -48,6 +47,7 @@ export default function MessageControls({
           "& .MuiOutlinedInput-root": {
             borderRadius: "20px 20px 20px 20px",
             bgcolor: "background.default",
+            mb: os === "iOS" ? 3 : 1.5,
           },
         }}
       />

@@ -1,14 +1,38 @@
-import { Box, Typography, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 
 export default function ReplyPreview({ replyingTo, setReplyingTo }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   if (!replyingTo) return null;
+
+  function TruncatedText({ text, maxLength = 180 }) {
+    if (!text) return null; 
+
+    text = text.split("\n")[0]
+
+    if (text.length > maxLength) {
+      return <>{text}...</>;
+    }
+
+    return <>{text}</>;
+  }
 
   return (
     <Box
       sx={{
         display: "flex",
         p: 1,
-        bgcolor: "#f5f5f5",
+        // bgcolor: "#f5f5f5",
+        borderTop:1,
+        borderBottom:1,
+        borderColor:"divider",
         borderLeft: "3px solid #1976d2",
         width: "100%",
       }}
@@ -40,15 +64,19 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
         </Typography>
         <Typography
           variant="body2"
+          color="text.primary"
           sx={{
+            display: "-webkit-box",
+            WebkitLineClamp: isMobile ? 280 : 400,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
-            overflowWrap: "anywhere",
+            maxHeight: "4.8em", // approximate: line-height ~1.2em × 4
           }}
-          color="text.primary"
-          noWrap
         >
-          {replyingTo.content}
+          <TruncatedText text={replyingTo.content} maxLength={220} />
         </Typography>
       </Box>
       <IconButton onClick={() => setReplyingTo(null)}>✕</IconButton>

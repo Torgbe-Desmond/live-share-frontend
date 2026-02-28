@@ -1,70 +1,83 @@
-import { Box, IconButton, AppBar, Toolbar, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 
 export default function ChatHeader({ isMobile, onMenuClick, isActive }) {
   return (
-    <AppBar
-      position="static"
-      elevation={0}
+    <Box
       sx={{
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
+        position: "relative", // behaves like static AppBar
+        width: "100%",
+        minHeight: 56,
+        px: { xs: 1.5, sm: 3 },
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 2,
+        // bgcolor: "background.paper"
       }}
     >
-      <Toolbar
-        variant="dense"
-        sx={{
-          minHeight: 56,
-          px: { xs: 2, sm: 3 },
-          gap: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          width: "100%",
-        }}
-      >
-        {isMobile && (
-          <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 0 }}>
-            <MenuIcon />
-          </IconButton>
-        )}
-
-        {/* <Typography
-          variant="h6"
-          color="text.secondary"
-          fontWeight={700}
-          noWrap
-          sx={{ letterSpacing: "-0.02em" }}
-        >
-          Playground
-        </Typography> */}
-
-        {!isMobile && <Box sx={{ flex: 1 }} />}
-        <Box
+      {/* Mobile menu button */}
+      {isMobile && (
+        <IconButton
+          edge="start"
+          onClick={onMenuClick}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            // justifyContent: !isMobile && "flex-end",
             color: "text.secondary",
+            bgcolor: "rgba(255, 255, 255, 0.1)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            borderRadius: 3,
+            px: 2,
+            py: 0.6,
+            ml: 0.5,
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+            "&:hover": {
+              bgcolor: "rgba(255, 255, 255, 0.15)",
+            },
           }}
         >
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: "50%",
-              bgcolor: isActive ? "success.main" : "error.light",
-              boxShadow: isActive
-                ? "0 0 0 4px alpha('success.main', 0.24)"
-                : "0 0 0 4px alpha('error.main', 0.16)",
-            }}
-          />
-          <Typography variant="body2" fontWeight={500}>
-            {isActive ? "online" : "offline"}
-          </Typography>
-        </Box>
-      </Toolbar>
-    </AppBar>
+          <MenuIcon />
+        </IconButton>
+      )}
+
+      {!isMobile && <Box sx={{ flex: 1 }} />}
+
+      {/* Status indicator */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.2,
+          color: "text.secondary",
+          bgcolor: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderRadius: 3,
+          px: 2,
+          py: 0.6,
+          boxShadow: "0 4px 20px rgba(32, 24, 24, 0.1)",
+        }}
+      >
+        <Box
+          sx={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            bgcolor: isActive ? "success.main" : "error.main",
+            boxShadow: isActive
+              ? "0 0 0 3px rgba(76, 175, 80, 0.3)"
+              : "0 0 0 3px rgba(244, 67, 54, 0.25)",
+            transition: "all 0.3s ease",
+          }}
+        />
+        <Typography
+          variant="body2"
+          fontWeight={500}
+          sx={{ userSelect: "none" }}
+        >
+          {isActive ? "Online" : "Offline"}
+        </Typography>
+      </Box>
+    </Box>
   );
 }

@@ -1,13 +1,28 @@
-import React from "react";
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import CreatePlayground from "./pages/CreatePlayground";
 import JoinPlayground from "./pages/JoinPlayground";
 import Playground from "./pages/Playground";
+import { useTheme } from "@emotion/react";
+import { useMediaQuery } from "@mui/material";
 
 function App() {
-  const  themeColorMeta = document.querySelector("meta[name='theme-color']")
-  themeColorMeta.setAttribute("content","#ffff")
+  const theme = useTheme();
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+
+  useEffect(() => {
+    const meta = document.querySelector("meta[name='theme-color']");
+    if (meta) {
+      meta.setAttribute(
+        "content",
+        prefersDark
+          ? theme.palette.background.default
+          : "#ffffff"
+      );
+    }
+  }, [prefersDark, theme]);
+
   return (
     <Router>
       <Routes>

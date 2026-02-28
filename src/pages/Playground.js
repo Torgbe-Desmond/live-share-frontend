@@ -308,7 +308,7 @@ export default function Playground() {
       )}
 
       {/* Main chat area */}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", }}>
         <ChatHeader
           isMobile={isMobile}
           onMenuClick={() => setMobileDrawerOpen(true)}
