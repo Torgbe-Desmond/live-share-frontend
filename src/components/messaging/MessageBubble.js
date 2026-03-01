@@ -91,7 +91,7 @@ const MessageBubble = forwardRef(
               borderRadius: 3,
               borderTopRightRadius: isOwn ? 0 : 12,
               borderTopLeftRadius: isOwn ? 12 : 0,
-              bgcolor: isOwn ? theme.palette.primary.main : "#fff",
+              bgcolor: isOwn ? theme.palette.primary.main : "inherit",
               color: isOwn
                 ? theme.palette.primary.contrastText
                 : theme.palette.text.primary,
@@ -124,10 +124,11 @@ const MessageBubble = forwardRef(
                   pl: 1.5,
                   py: 0.5,
                   mb: 1,
+                  pr:1.5,
                   opacity: 0.9,
                   bgcolor: isOwn
                     ? alpha("#000", 0.15)
-                    : alpha(theme.palette.grey[200], 0.6),
+                    : alpha(theme.palette.grey[200], 0.2),
                   borderRadius: 1.5,
                 }}
                 onClick={() => onClicReply(msg)}

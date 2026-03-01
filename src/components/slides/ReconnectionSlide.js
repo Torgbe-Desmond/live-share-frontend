@@ -20,7 +20,7 @@ function ReconnectionSlide({
         <Box
           sx={{
             position: "fixed",
-            bottom: { xs: 88, sm: 96 }, // slightly higher on larger screens
+            bottom: { xs: 0, sm: 16 }, // slightly higher on larger screens
             left: 0,
             right: 0,
             display: "flex",

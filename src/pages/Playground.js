@@ -352,7 +352,7 @@ export default function Playground() {
             <div ref={bottomRef} />
           </List>
         </Box>
-
+{!showReconnect &&
         <MessageInput
           message={message}
           setMessage={setMessage}
@@ -363,7 +363,7 @@ export default function Playground() {
           setReplyingTo={setReplyingTo}
           selectedFiles={selectedFiles}
           setSelectedFiles={setSelectedFiles}
-        />
+        />}
 
         {/* Reconnect button – only hides on real success */}
         <ReconnectionSlide

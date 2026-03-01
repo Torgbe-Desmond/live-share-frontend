@@ -29,7 +29,6 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
       sx={{
         display: "flex",
         p: 1,
-        // bgcolor: "#f5f5f5",
         borderTop:1,
         borderBottom:1,
         borderColor:"divider",

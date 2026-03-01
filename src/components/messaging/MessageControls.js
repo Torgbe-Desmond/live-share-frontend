@@ -23,9 +23,6 @@ export default function MessageControls({
     <Box
       sx={{
         p: 1.5,
-        // borderTop: "1px solid",
-        // borderColor: "divider",
-        // bgcolor: "background.paper",
         display: "flex",
         alignItems: "center",
         gap: 1,
@@ -43,28 +40,31 @@ export default function MessageControls({
         multiline
         elevation={10}
         maxRows={4}
+        InputProps={{
+          endAdornment: (
+            <IconButton
+              color="primary"
+              onClick={onSend}
+              disabled={!message.trim() && selectedFilesCount === 0}
+              sx={{
+                bgcolor: "primary.main",
+                color: "white",
+                "&:hover": { bgcolor: "primary.dark" },
+                "&.Mui-disabled": { bgcolor: "action.disabledBackground" },
+              }}
+            >
+              <SendIcon />
+            </IconButton>
+          ),
+        }}
         sx={{
           "& .MuiOutlinedInput-root": {
             borderRadius: "20px 20px 20px 20px",
             bgcolor: "background.default",
-            mb: os === "iOS" ? 3 : 1.5,
+            mb: os === "iOS" ? 3 : 0.5,
           },
         }}
       />
-
-      <IconButton
-        color="primary"
-        onClick={onSend}
-        disabled={!message.trim() && selectedFilesCount === 0}
-        sx={{
-          bgcolor: "primary.main",
-          color: "white",
-          "&:hover": { bgcolor: "primary.dark" },
-          "&.Mui-disabled": { bgcolor: "action.disabledBackground" },
-        }}
-      >
-        <SendIcon />
-      </IconButton>
     </Box>
   );
 }

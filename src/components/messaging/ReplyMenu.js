@@ -58,7 +58,7 @@ export default function ReplyMenu({
               ? theme.palette.primary.contrastText
               : theme.palette.text.secondary,
             "&:hover": {
-              color: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
               transform: "scale(1.15)",
             },
             "&:active": {
