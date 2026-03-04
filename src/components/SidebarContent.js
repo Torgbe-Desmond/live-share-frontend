@@ -30,7 +30,7 @@ export default function SidebarContent({
         display: "flex",
         zIndex: 1300,
         flexDirection: "column",
-        pb: os === "iOS" ? 3 : 1.5,
+        pb: os === "iOS" ? 2 : 0.5,
       }}
     >
       <OnlineUsersList users={users} currentUsername={username} />
