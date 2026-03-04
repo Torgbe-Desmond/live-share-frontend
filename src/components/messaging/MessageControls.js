@@ -11,7 +11,6 @@ export default function MessageControls({
   setSelectedFiles,
 }) {
   const os = useDeviceOS();
-
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -32,13 +31,12 @@ export default function MessageControls({
 
       <TextField
         fullWidth
-        size="medium"
+        size="small"
         placeholder="Type a message..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         multiline
-        elevation={10}
         maxRows={4}
         InputProps={{
           endAdornment: (
@@ -46,23 +44,30 @@ export default function MessageControls({
               color="primary"
               onClick={onSend}
               disabled={!message.trim() && selectedFilesCount === 0}
+              size="small"
               sx={{
                 bgcolor: "primary.main",
                 color: "white",
+                p: 0.8,
                 "&:hover": { bgcolor: "primary.dark" },
                 "&.Mui-disabled": { bgcolor: "action.disabledBackground" },
               }}
             >
-              <SendIcon />
+              <SendIcon fontSize="small" />
             </IconButton>
           ),
         }}
         sx={{
           "& .MuiOutlinedInput-root": {
-            borderRadius: "20px 20px 20px 20px",
+            borderRadius: 5,
             bgcolor: "background.default",
-            mb: os === "iOS" ? 3 : 0.5,
+            paddingTop: "4px",  
+            paddingBottom: "4px",
           },
+          "& textarea": {
+            padding: "6px 8px", 
+          },
+          mb: os === "iOS" ? 2 : 0.5,
         }}
       />
     </Box>
