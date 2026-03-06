@@ -32,7 +32,7 @@ export default function SidebarContent({
         flexDirection: "column",
         justifyContent: "space-between",
         overflow: "hidden",
-        bgcolor: "background.default", // Pure Twitter Black
+        bgcolor: "background.default", 
       }}
     >
       {/* --- TOP SECTION: ONLINE USERS --- */}

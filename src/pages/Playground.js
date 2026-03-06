@@ -158,7 +158,7 @@ export default function Playground() {
         />
         <Divider sx={{ borderColor: "divider" }} />
 
-        <DrawerHeader sx={{ justifyContent: open ? "space-between" : "center" }}>
+        <DrawerHeader sx={{ justifyContent: open ? "space-between" : "center" , mt:2.5, mb:2}}>
           {open && (
             <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-start" }}>
               <RoomClipboard roomName={roomName} />
