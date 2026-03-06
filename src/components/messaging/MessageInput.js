@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import ReplyPreview from "./preview/ReplyPreview";
 import UploadedFilesPreview from "./preview/UploadedFilesPreview";
 import MessageControls from "./MessageControls";
