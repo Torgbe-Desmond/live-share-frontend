@@ -18,7 +18,6 @@ import socket from "../socket";
 
 const drawerWidth = 240;
 
-
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   ({ theme, open }) => ({
     flexGrow: 1,
@@ -41,9 +40,8 @@ const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
         duration: theme.transitions.duration.enteringScreen,
       }),
     }),
-  })
+  }),
 );
-
 
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -54,7 +52,7 @@ const Drawer = styled(MuiDrawer, {
   "& .MuiDrawer-paper": {
     backgroundColor: theme.palette.background.default,
     // THEME BORDER: Crisp separation line
-    borderRight: `1px solid ${theme.palette.divider}`, 
+    borderRight: `1px solid ${theme.palette.divider}`,
     ...(open
       ? {
           width: drawerWidth,
@@ -115,17 +113,38 @@ export default function Playground() {
       return;
     }
     if (!socket.connected) socket.connect();
-    socket.emit("joinRoom", { roomName: storedRoomName, userId: storedUserId, username: storedUsername });
-    setTimeout(() => { if (!isActive) setIsReconnecting(false); }, 8000);
+    socket.emit("joinRoom", {
+      roomName: storedRoomName,
+      userId: storedUserId,
+      username: storedUsername,
+    });
+    setTimeout(() => {
+      if (!isActive) setIsReconnecting(false);
+    }, 8000);
   };
 
   useEffect(() => {
-    const handleDisconnect = () => { setIsActive(false); setShowReconnect(true); setIsReconnecting(false); };
-    const handleConnect = () => { setIsActive(true); setShowReconnect(false); setIsReconnecting(false); setRetryCount(0); };
+    const handleDisconnect = () => {
+      setIsActive(false);
+      setShowReconnect(true);
+      setIsReconnecting(false);
+    };
+    const handleConnect = () => {
+      setIsActive(true);
+      setShowReconnect(false);
+      setIsReconnecting(false);
+      setRetryCount(0);
+    };
     socket.on("disconnect", handleDisconnect);
     socket.on("connect", handleConnect);
-    if (!socket.connected) { setShowReconnect(true); setIsActive(false); }
-    return () => { socket.off("disconnect", handleDisconnect); socket.off("connect", handleConnect); };
+    if (!socket.connected) {
+      setShowReconnect(true);
+      setIsActive(false);
+    }
+    return () => {
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect", handleConnect);
+    };
   }, []);
 
   useEffect(() => {
@@ -133,22 +152,50 @@ export default function Playground() {
     const sRoom = localStorage.getItem("roomName");
     const sUser = localStorage.getItem("username");
     if (sId && sRoom && sUser) {
-      setSenderId(sId); setRoomName(sRoom); setUsername(sUser);
-      if (socket.connected) socket.emit("joinRoom", { roomName: sRoom, userId: sId, username: sUser });
+      setSenderId(sId);
+      setRoomName(sRoom);
+      setUsername(sUser);
+      if (socket.connected)
+        socket.emit("joinRoom", {
+          roomName: sRoom,
+          userId: sId,
+          username: sUser,
+        });
     }
   }, []);
 
   const handleLeaveRoom = () => {
-    if (roomName && senderId) socket.emit("leaveRoom", { roomName, userId: senderId, username });
-    localStorage.removeItem("roomName"); localStorage.removeItem("userId"); localStorage.removeItem("username");
+    if (roomName && senderId)
+      socket.emit("leaveRoom", { roomName, userId: senderId, username });
+    localStorage.removeItem("roomName");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
     navigate("/");
   };
 
   return (
-    <Box sx={{ display: "flex", width: "100vw", height: "100dvh", overflow: "hidden", bgcolor: "background.default" }}>
+    <Box
+      sx={{
+        display: "flex",
+        width: "100vw",
+        height: "100dvh",
+        overflow: "hidden",
+        bgcolor: "background.default",
+      }}
+    >
       <CssBaseline />
 
-      <Drawer variant="permanent" open={open}>
+      <Drawer
+        sx={{
+          "& .MuiDrawer-paper": {
+            border: "none",
+            borderRight: 1,
+            borderColor: "divider",
+          },
+        }}
+        variant="permanent"
+        open={open}
+      >
         <SidebarContent
           open={open}
           users={users}
@@ -158,9 +205,21 @@ export default function Playground() {
         />
         <Divider sx={{ borderColor: "divider" }} />
 
-        <DrawerHeader sx={{ justifyContent: open ? "space-between" : "center" , mt:2.5, mb:2}}>
+        <DrawerHeader
+          sx={{
+            justifyContent: open ? "space-between" : "center",
+            mt: 2.5,
+            mb: 2,
+          }}
+        >
           {open && (
-            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-start" }}>
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
               <RoomClipboard roomName={roomName} />
             </Box>
           )}
@@ -173,9 +232,20 @@ export default function Playground() {
       <Main open={open}>
         <Outlet
           context={{
-            senderId, roomName, username, users, setUsers,
-            showReconnect, setShowReconnect, isActive, setIsActive,
-            isReconnecting, setIsReconnecting, retryCount, setRetryCount, attemptReconnect,
+            senderId,
+            roomName,
+            username,
+            users,
+            setUsers,
+            showReconnect,
+            setShowReconnect,
+            isActive,
+            setIsActive,
+            isReconnecting,
+            setIsReconnecting,
+            retryCount,
+            setRetryCount,
+            attemptReconnect,
           }}
         />
         <ReconnectionSlide

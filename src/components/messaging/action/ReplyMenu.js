@@ -4,13 +4,9 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useTheme } from "@mui/material/styles";
 import { Box, Tooltip, useMediaQuery, Paper } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 
-export default function ReplyMenu({
-  msg,
-  senderId,
-  onReply,
-  msgRef,
-}) {
+export default function ReplyMenu({ msg, senderId, onReply, msgRef }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isOwn = msg?.senderId === senderId;
@@ -18,6 +14,21 @@ export default function ReplyMenu({
   const [copied, setCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
+  function getUrlCategory(content) {
+    const urlRegex = /https?:\/\/[^\s]+/;
+    const tokens = content.split(" ");
+    const urlToken = tokens.find((token) => urlRegex.test(token));
+
+    if (!urlToken) return "none";
+
+    // Check the domain
+    if (urlToken.includes("tiktok.com") || urlToken.includes("vm.tiktok.com")) {
+      return "tiktok";
+    }
+
+    // If it's a valid URL but not TikTok
+    return "generic_link";
+  }
   const handleCopy = async (e) => {
     try {
       await navigator.clipboard.writeText(msg?.content || "");
@@ -40,7 +51,7 @@ export default function ReplyMenu({
         title={isCopy ? (copied ? "Copied!" : "Copy") : "Reply"}
         arrow
         placement="top"
-        open={isMobile ? false : (isCopy ? tooltipOpen : undefined)}
+        open={isMobile ? false : isCopy ? tooltipOpen : undefined}
       >
         <IconButton
           size={isMobile ? "medium" : "small"}
@@ -51,9 +62,12 @@ export default function ReplyMenu({
           sx={{
             p: isMobile ? 1 : 0.6,
             // Use primary color for icons to make them pop on white
-            color: isCopy && copied 
-              ? "success.main" 
-              : (isOwn ? "primary.main" : "text.secondary"),
+            color:
+              isCopy && copied
+                ? "success.main"
+                : isOwn
+                  ? "primary.main"
+                  : "text.secondary",
             transition: "all 0.2s ease",
             "&:hover": {
               bgcolor: "rgba(0, 0, 0, 0.04)",
@@ -64,7 +78,7 @@ export default function ReplyMenu({
             },
             "& svg": {
               fontSize: isMobile ? "1.1rem" : "0.95rem",
-            }
+            },
           }}
         >
           {icon}
@@ -80,7 +94,7 @@ export default function ReplyMenu({
         display: "flex",
         alignItems: "center",
         // Soft border and light grey bg makes it visible against white
-        bgcolor: "#fcfcfc", 
+        bgcolor: "#fcfcfc",
         border: "1px solid",
         borderColor: "divider", // Uses the standard MUI divider color
         borderRadius: "20px",
@@ -99,7 +113,7 @@ export default function ReplyMenu({
         icon={<ReplyIcon />}
         name="reply"
       />
-      
+
       {/* Small vertical divider between buttons */}
       <Box sx={{ width: "1px", height: "16px", bgcolor: "divider", mx: 0.3 }} />
 
@@ -108,6 +122,20 @@ export default function ReplyMenu({
         icon={<ContentCopyIcon />}
         name="copy"
       />
+
+      {getUrlCategory(msg?.content || "") === "tiktok" && (
+        <>
+          <Box
+            sx={{ width: "1px", height: "16px", bgcolor: "divider", mx: 0.3 }}
+          />
+
+          <ActionButton
+            onClick={() => {}}
+            icon={<DownloadIcon />}
+            name="download"
+          />
+        </>
+      )}
     </Paper>
   );
 }
