@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
-import ReplyPreview from "./ReplyPreview";
-import UploadedFilesPreview from "./UploadedFilesPreview";
+import ReplyPreview from "./preview/ReplyPreview";
+import UploadedFilesPreview from "./preview/UploadedFilesPreview";
 import MessageControls from "./MessageControls";
 // import { ChatDemo } from "./DockedChatWindows";
 
@@ -14,17 +14,17 @@ export default function MessageInput(props) {
   } = props;
 
   return (
-    <Box>
+    <div style={{ background: "transparent" }}>
       <input type="file" multiple hidden ref={fileInputRef} />
 
       <ReplyPreview replyingTo={replyingTo} setReplyingTo={setReplyingTo} />
-      {/* <ChatDemo /> */}
+
       <UploadedFilesPreview
         setSelectedFiles={setSelectedFiles}
         selectedFiles={selectedFiles}
       />
 
       <MessageControls {...props} />
-    </Box>
+    </div>
   );
 }

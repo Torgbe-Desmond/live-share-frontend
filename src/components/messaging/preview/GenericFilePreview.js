@@ -12,7 +12,7 @@ export default function GenericFilePreview({
   const [revealed, setRevealed] = useState(!restrictedViewOnce);
 
   useEffect(() => {
-    if (restrictedViewOnce && !revealed) {
+    if (restrictedViewOnce && !revealed)  {
       // mark as viewed after revealing
       const timer = setTimeout(() => {
         setRevealed(true);

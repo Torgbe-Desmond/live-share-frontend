@@ -6,6 +6,7 @@ import JoinPlayground from "./pages/JoinPlayground";
 import Playground from "./pages/Playground";
 import { useTheme } from "@emotion/react";
 import { useMediaQuery } from "@mui/material";
+import ChatRoom from "./pages/ChatRoom";
 
 function App() {
   const theme = useTheme();
@@ -16,9 +17,7 @@ function App() {
     if (meta) {
       meta.setAttribute(
         "content",
-        prefersDark
-          ? theme.palette.background.default
-          : "#ffffff"
+        prefersDark ? theme.palette.background.default : "#ffffff",
       );
     }
   }, [prefersDark, theme]);
@@ -29,7 +28,10 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/create" element={<CreatePlayground />} />
         <Route path="/join" element={<JoinPlayground />} />
-        <Route path="/playground" element={<Playground />} />
+        <Route path="/playground" element={<Playground />}>
+          <Route index element={<ChatRoom />} />
+          {/* You can later add /playground/settings, /playground/files etc */}
+        </Route>{" "}
       </Routes>
     </Router>
   );

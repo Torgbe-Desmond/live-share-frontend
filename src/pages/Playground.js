@@ -1,371 +1,183 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { styled } from "@mui/material/styles";
 import {
   Box,
-  List,
-  Drawer,
-  Snackbar,
-  Alert,
-  useMediaQuery,
-  useTheme,
+  CssBaseline,
+  Drawer as MuiDrawer,
+  Divider,
+  IconButton,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-import socket from "../socket";
-import SidebarContent from "../components/SidebarContent";
-import ChatHeader from "../components/ChatHeader";
-import MessageBubble from "../components/messaging/MessageBubble";
-import MessageInput from "../components/messaging/MessageInput";
-import { uploadFile } from "../api/fileApi";
-import useSocketListeners from "../components/useSocketListeners";
+import SidebarContent from "../components/sidebar/SidebarContent";
+import RoomClipboard from "../components/sidebar/roomClipboard";
 import ReconnectionSlide from "../components/slides/ReconnectionSlide";
+import socket from "../socket";
+
+const drawerWidth = 240;
+
+
+const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
+  ({ theme, open }) => ({
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    height: "100dvh",
+    minWidth: "80vw",
+    transition: theme.transitions.create(["margin", "width"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginLeft: `calc(${theme.spacing(7)} + 1px)`,
+    [theme.breakpoints.up("sm")]: {
+      marginLeft: `calc(${theme.spacing(8)} + 1px)`,
+    },
+    ...(open && {
+      marginLeft: `${drawerWidth}px`,
+      transition: theme.transitions.create(["margin", "width"], {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    }),
+  })
+);
+
+
+const Drawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  "& .MuiDrawer-paper": {
+    backgroundColor: theme.palette.background.default,
+    // THEME BORDER: Crisp separation line
+    borderRight: `1px solid ${theme.palette.divider}`, 
+    ...(open
+      ? {
+          width: drawerWidth,
+          transition: theme.transitions.create("width", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          overflowX: "hidden",
+        }
+      : {
+          transition: theme.transitions.create("width", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+          overflowX: "hidden",
+          width: `calc(${theme.spacing(7)} + 1px)`,
+          [theme.breakpoints.up("sm")]: {
+            width: `calc(${theme.spacing(8)} + 1px)`,
+          },
+        }),
+  },
+}));
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  padding: theme.spacing(0, 1),
+  ...theme.mixins.toolbar,
+}));
 
 export default function Playground() {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState(new Set());
-  const [senderId, setSenderId] = useState(null);
-  const [roomName, setRoomName] = useState(null);
-  const [username, setUsername] = useState(null);
-  const [users, setUsers] = useState(new Set());
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [leftMessage, setLeftMessage] = useState("");
-  const [joinedMessage, setJoinedMessage] = useState("");
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [isActive, setIsActive] = useState(true);
+  const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
   const [showReconnect, setShowReconnect] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [roomName, setRoomName] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [senderId, setSenderId] = useState(null);
+  const [users, setUsers] = useState(new Set());
 
-  const fileInputRef = useRef(null);
-  const bottomRef = useRef(null);
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const messageRefs = useRef(new Map());
-  const reconnectTimeoutRef = useRef(null);
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
 
-  // ─── Reconnect logic ────────────────────────────────────────────────
-
-  useSocketListeners(
-    senderId,
-    setMessages,
-    users,
-    setUsers,
-    setLeftMessage,
-    setJoinedMessage,
-  );
-
+  // Reconnection Logic
   const attemptReconnect = () => {
     if (isReconnecting) return;
-
     setIsReconnecting(true);
     setRetryCount((prev) => prev + 1);
-
     const storedUserId = localStorage.getItem("userId");
     const storedRoomName = localStorage.getItem("roomName");
     const storedUsername = localStorage.getItem("username");
-
     if (!storedUserId || !storedRoomName || !storedUsername) {
       setIsReconnecting(false);
-      // Optionally show error: "Missing credentials"
       return;
     }
-
-    // Force socket reconnection if needed
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    // Re-join the room
-    socket.emit("joinRoom", {
-      roomName: storedRoomName,
-      userId: storedUserId,
-      username: storedUsername,
-    });
-
-    // Timeout: if no real success after 8 seconds → show button again
-    reconnectTimeoutRef.current = setTimeout(() => {
-      if (!isActive) {
-        setIsReconnecting(false);
-      }
-    }, 8000);
-  };
-
-  const handleSuccessfulConnection = () => {
-    setIsActive(true);
-    setShowReconnect(false);
-    setIsReconnecting(false);
-    setRetryCount(0);
-
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
+    if (!socket.connected) socket.connect();
+    socket.emit("joinRoom", { roomName: storedRoomName, userId: storedUserId, username: storedUsername });
+    setTimeout(() => { if (!isActive) setIsReconnecting(false); }, 8000);
   };
 
   useEffect(() => {
-    const handleDisconnect = (reason) => {
-      setIsActive(false);
-      setShowReconnect(true);
-      setIsReconnecting(false);
-      // console.log("Socket disconnected:", reason);
-    };
-
-    const handleConnect = () => {
-      // Real connection established → consider success (for now)
-      // If your backend sends "joinSuccess" or similar → move logic there
-      handleSuccessfulConnection();
-    };
-
+    const handleDisconnect = () => { setIsActive(false); setShowReconnect(true); setIsReconnecting(false); };
+    const handleConnect = () => { setIsActive(true); setShowReconnect(false); setIsReconnecting(false); setRetryCount(0); };
     socket.on("disconnect", handleDisconnect);
     socket.on("connect", handleConnect);
-
-    // Optional stronger confirmation (recommended if backend supports it):
-    // socket.on("joinSuccess", handleSuccessfulConnection);
-    // socket.on("joinError", (err) => {
-    //   setIsReconnecting(false);
-    //   // show snackbar: "Join failed: " + err.message
-    // });
-
-    // Initial state check
-    if (!socket.connected) {
-      setShowReconnect(true);
-      setIsActive(false);
-    }
-
-    return () => {
-      socket.off("disconnect", handleDisconnect);
-      socket.off("connect", handleConnect);
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-    };
+    if (!socket.connected) { setShowReconnect(true); setIsActive(false); }
+    return () => { socket.off("disconnect", handleDisconnect); socket.off("connect", handleConnect); };
   }, []);
 
-  // Load stored data and auto-join if already connected
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
-    const storedRoomName = localStorage.getItem("roomName");
-    const storedUsername = localStorage.getItem("username");
-
-    if (storedUserId && storedRoomName && storedUsername) {
-      setSenderId(storedUserId);
-      setRoomName(storedRoomName);
-      setUsername(storedUsername);
-
-      if (socket.connected) {
-        socket.emit("joinRoom", {
-          roomName: storedRoomName,
-          userId: storedUserId,
-          username: storedUsername,
-        });
-      }
+    const sId = localStorage.getItem("userId");
+    const sRoom = localStorage.getItem("roomName");
+    const sUser = localStorage.getItem("username");
+    if (sId && sRoom && sUser) {
+      setSenderId(sId); setRoomName(sRoom); setUsername(sUser);
+      if (socket.connected) socket.emit("joinRoom", { roomName: sRoom, userId: sId, username: sUser });
     }
   }, []);
-
-  // Auto-scroll
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // ─── Send message / upload logic ────────────────────────────────────
-  const uploadFileHandler = async (formData, localMessageId = null) => {
-    try {
-      const { success, data: backendMessage } = await uploadFile(formData);
-
-      if (success && localMessageId) {
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) =>
-            msg.messageId === localMessageId ? backendMessage : msg,
-          ),
-        );
-      }
-    } catch (err) {
-      if (localMessageId) {
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) => {
-            if (msg.messageId === localMessageId) {
-              return {
-                ...msg,
-                files: msg.files?.map((f) => ({ ...f, isFailed: true })) || [],
-              };
-            }
-            return msg;
-          }),
-        );
-      }
-    }
-  };
-
-  const markFileAsViewed = (messageId, filePublicId) => {
-    setMessages((prevMessages) =>
-      prevMessages.map((msg) => {
-        if (msg.messageId !== messageId) return msg;
-
-        return {
-          ...msg,
-          files: msg.files?.map((f) =>
-            f.publicId === filePublicId ? { ...f, viewed: false } : f,
-          ),
-        };
-      }),
-    );
-  };
-
-  const handleSend = async () => {
-    if (!senderId || !roomName) return;
-    if (!message.trim() && selectedFiles.size === 0) return;
-
-    const selectedFile = [...selectedFiles][0];
-
-    const messageId = Date.now().toString();
-    const localMessageObject = {
-      messageId,
-      content: message.trim(),
-      senderId,
-      roomName,
-      username,
-      replyTo: replyingTo
-        ? {
-            messageId: replyingTo.messageId || "",
-            content: replyingTo.content,
-            username: replyingTo.username,
-            files: replyingTo?.files || [],
-          }
-        : null,
-      files: selectedFile ? [selectedFile] : [],
-    };
-
-    setMessages((prev) => [...prev, localMessageObject]);
-
-    const formData = new FormData();
-    formData.append("content", message.trim());
-    formData.append("senderId", senderId);
-    formData.append("roomName", roomName);
-    formData.append("username", username);
-    formData.append("messageId", messageId);
-
-    if (selectedFile) {
-      formData.append("file", selectedFile.file);
-    }
-
-    if (replyingTo) {
-      formData.append(
-        "replyTo",
-        JSON.stringify({
-          content: replyingTo.content,
-          username: replyingTo.username,
-          files: replyingTo.files || [],
-          messageId: replyingTo.messageId,
-        }),
-      );
-    }
-
-    setSelectedFiles(new Set());
-    setReplyingTo(null);
-    setMessage("");
-
-    await uploadFileHandler(formData, messageId);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
 
   const handleLeaveRoom = () => {
-    if (roomName && senderId) {
-      socket.emit("leaveRoom", { roomName, userId: senderId, username });
-    }
-    localStorage.removeItem("roomName");
-    localStorage.removeItem("userId");
+    if (roomName && senderId) socket.emit("leaveRoom", { roomName, userId: senderId, username });
+    localStorage.removeItem("roomName"); localStorage.removeItem("userId"); localStorage.removeItem("username");
     navigate("/");
   };
 
-  // ─── Render ─────────────────────────────────────────────────────────
   return (
-    <Box sx={{ height: "100dvh", display: "flex", overflow: "hidden" }}>
-      {/* Sidebar */}
-      {isMobile ? (
-        <Drawer
-          anchor="left"
-          open={mobileDrawerOpen}
-          onClose={() => setMobileDrawerOpen(false)}
-          sx={{ "& .MuiDrawer-paper": { width: 280 } }}
-        >
-          <SidebarContent
-            users={users}
-            roomName={roomName}
-            username={username}
-            onLeaveRoom={handleLeaveRoom}
-          />
-        </Drawer>
-      ) : (
-        <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <SidebarContent
-            users={users}
-            roomName={roomName}
-            username={username}
-            onLeaveRoom={handleLeaveRoom}
-          />
-        </Box>
-      )}
+    <Box sx={{ display: "flex", width: "100vw", height: "100dvh", overflow: "hidden", bgcolor: "background.default" }}>
+      <CssBaseline />
 
-      {/* Main chat area */}
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", }}>
-        <ChatHeader
-          isMobile={isMobile}
-          onMenuClick={() => setMobileDrawerOpen(true)}
-          isActive={isActive}
+      <Drawer variant="permanent" open={open}>
+        <SidebarContent
+          open={open}
+          users={users}
+          username={username}
+          roomName={roomName}
+          onLeave={handleLeaveRoom}
         />
+        <Divider sx={{ borderColor: "divider" }} />
 
-        <Box
-          component="main"
-          sx={{
-            flex: 1,
-            overflowY: "auto",
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
+        <DrawerHeader sx={{ justifyContent: open ? "space-between" : "center" }}>
+          {open && (
+            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "flex-start" }}>
+              <RoomClipboard roomName={roomName} />
+            </Box>
+          )}
+          <IconButton onClick={open ? handleDrawerClose : handleDrawerOpen}>
+            {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </DrawerHeader>
+      </Drawer>
+
+      <Main open={open}>
+        <Outlet
+          context={{
+            senderId, roomName, username, users, setUsers,
+            showReconnect, setShowReconnect, isActive, setIsActive,
+            isReconnecting, setIsReconnecting, retryCount, setRetryCount, attemptReconnect,
           }}
-        >
-          <List disablePadding sx={{ mt: "auto" }}>
-            {messages.map((msg, index) => (
-              <MessageBubble
-                key={`${msg.senderId}-${index}`}
-                msg={msg}
-                senderId={senderId}
-                onReply={setReplyingTo}
-                onMediaViewed={(filePublicId) => {
-                  markFileAsViewed(msg.messageId, filePublicId);
-                }}
-                onClicReply={(replyMsg) => {
-                  if (replyMsg.replyTo?.messageId) {
-                    const ref = messageRefs.current.get(
-                      replyMsg.replyTo.messageId,
-                    );
-                    ref?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "center",
-                    });
-                  }
-                }}
-                ref={(el) => el && messageRefs.current.set(msg.messageId, el)}
-              />
-            ))}
-            <div ref={bottomRef} />
-          </List>
-        </Box>
-{!showReconnect &&
-        <MessageInput
-          message={message}
-          setMessage={setMessage}
-          onSend={handleSend}
-          fileInputRef={fileInputRef}
-          selectedFilesCount={selectedFiles.size}
-          replyingTo={replyingTo}
-          setReplyingTo={setReplyingTo}
-          selectedFiles={selectedFiles}
-          setSelectedFiles={setSelectedFiles}
-        />}
-
-        {/* Reconnect button – only hides on real success */}
+        />
         <ReconnectionSlide
           showReconnect={showReconnect}
           isActive={isActive}
@@ -374,31 +186,7 @@ export default function Playground() {
           retryCount={retryCount}
           roomName={roomName}
         />
-
-        {/* Notifications */}
-        <Snackbar
-          sx={{ marginTop: 1 }}
-          open={Boolean(leftMessage)}
-          autoHideDuration={4000}
-          onClose={() => setLeftMessage("")}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert onClose={() => setLeftMessage("")} severity="warning">
-            {leftMessage}
-          </Alert>
-        </Snackbar>
-
-        <Snackbar
-          open={Boolean(joinedMessage)}
-          autoHideDuration={4000}
-          onClose={() => setJoinedMessage("")}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert onClose={() => setJoinedMessage("")} severity="info">
-            {joinedMessage}
-          </Alert>
-        </Snackbar>
-      </Box>
+      </Main>
     </Box>
   );
 }

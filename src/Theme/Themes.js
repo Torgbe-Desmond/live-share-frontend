@@ -1,48 +1,58 @@
 import { createTheme } from "@mui/material/styles";
 
-const glassBackground = "rgba(255, 255, 255, 0.06)";
-const glassBorder = "1px solid rgba(255, 255, 255, 0.08)";
-const glassBlur = "blur(20px)";
+// Twitter-specific constants
+const twitterBlack = "#000000";
+const twitterDarkGray = "#16181c"; // Used for search bars/secondary backgrounds
+const twitterBorder = "#2f3336"; // The classic thin Twitter border
+const twitterBlue = "#1d9bf0";   // The official "X" blue
 
 export const darkTheme = createTheme({
   palette: {
     mode: "dark",
     background: {
-      default: "#0f172a", // deep slate
-      paper: "rgba(255,255,255,0.04)",
+      default: twitterBlack,
+      paper: twitterBlack, // Pure black for the main feed
     },
     primary: {
-      main: "#6366f1", // soft indigo
+      main: twitterBlue,
+      contrastText: "#ffffff",
     },
     secondary: {
-      main: "#22d3ee", // cyan accent
+      main: "#eff3f4", // Off-white for secondary text/icons
     },
-    success: {
-      main: "#22c55e",
-    },
-    error: {
-      main: "#ef4444",
+    divider: twitterBorder,
+    text: {
+      primary: "#e7e9ea",
+      secondary: "#71767b", // Muted gray for timestamps and handles
     },
   },
 
-  // shape: {
-  //   borderRadius: 2,
-  // },
-
   typography: {
-    fontFamily: `"Inter", "Roboto", sans-serif`,
+    fontFamily: `"-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica", "Arial", sans-serif`,
+    button: {
+      textTransform: "none",
+      fontWeight: 700,
+    },
+  },
+
+  shape: {
+    borderRadius: 16, // Twitter uses very rounded buttons and inputs
   },
 
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          background: `
-            radial-gradient(circle at 20% 20%, rgba(99,102,241,0.15), transparent 40%),
-            radial-gradient(circle at 80% 80%, rgba(34,211,238,0.1), transparent 40%),
-            #0f172a
-          `,
-          minHeight: "100vh",
+          backgroundColor: twitterBlack,
+          scrollBehavior: "smooth",
+          // Custom scrollbar to match dark theme
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#3e4144",
+            borderRadius: "10px",
+          },
         },
       },
     },
@@ -50,23 +60,8 @@ export const darkTheme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          background: glassBackground,
-          backdropFilter: glassBlur,
-          WebkitBackdropFilter: glassBlur,
-          border: glassBorder,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-        },
-      },
-    },
-
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          background: glassBackground,
-          backdropFilter: glassBlur,
-          WebkitBackdropFilter: glassBlur,
-          border: glassBorder,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          backgroundImage: "none", // Removes the default MUI elevation overlay
+          border: `1px solid ${twitterBorder}`,
         },
       },
     },
@@ -74,22 +69,10 @@ export const darkTheme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: "rgba(15, 23, 42, 0.6)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          borderBottom: glassBorder,
+          backgroundColor: "rgba(0, 0, 0, 0.65)",
+          backdropFilter: "blur(12px)",
+          borderBottom: `1px solid ${twitterBorder}`,
           boxShadow: "none",
-        },
-      },
-    },
-
-    MuiDrawer: {
-      styleOverrides: {
-        paper: {
-          background: glassBackground,
-          backdropFilter: glassBlur,
-          WebkitBackdropFilter: glassBlur,
-          borderRight: glassBorder,
         },
       },
     },
@@ -97,19 +80,23 @@ export const darkTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 1,
-          textTransform: "none",
-          backdropFilter: "blur(12px)",
+          borderRadius: "9999px", // Fully rounded "pill" buttons
+          padding: "8px 16px",
+          fontSize: "15px",
         },
-        contained: {
-          background: "rgba(99,102,241,0.8)",
-          boxShadow: "0 4px 20px rgba(99,102,241,0.4)",
+        containedPrimary: {
+          backgroundColor: twitterBlue,
           "&:hover": {
-            background: "rgba(99,102,241,1)",
+            backgroundColor: "#1a8cd8",
           },
         },
         outlined: {
-          border: glassBorder,
+          borderColor: "#536471",
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "rgba(239, 243, 244, 0.1)",
+            borderColor: "#cfd9de",
+          },
         },
       },
     },
@@ -118,16 +105,33 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            background: "rgba(255,255,255,0.04)",
-            backdropFilter: "blur(12px)",
-            borderRadius: 12,
+            backgroundColor: twitterDarkGray,
+            borderRadius: "9999px", // Pill-shaped search/inputs
+            "& fieldset": {
+              border: "1px solid transparent",
+            },
+            "&:hover fieldset": {
+              borderColor: twitterBlue,
+            },
+            "&.Mui-focused fieldset": {
+              borderWidth: "1px",
+            },
+          },
+        },
+      },
+    },
+
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 0.03)", // Subtle hover on feed items
           },
         },
       },
     },
   },
 });
-
 const commonTypography = {
   typography: {
     fontFamily: `"JetBrains Mono", "monospace"`,

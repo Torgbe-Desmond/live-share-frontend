@@ -4,12 +4,15 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { ThemeProviderWrapper } from "./Theme/ThemeContext";
+import { ChatProvider } from "./context/chatContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <ThemeProviderWrapper>
-      <App />
+      <ChatProvider>
+        <App />
+      </ChatProvider>
     </ThemeProviderWrapper>
   </React.StrictMode>,
 );
