@@ -54,7 +54,6 @@ const MessageBubble = forwardRef(
           px: isMobile ? 1 : 2,
           py: 0.5,
           justifyContent: isOwn ? "flex-end" : "flex-start",
-          bgcolor: isActive ? "action.selected" : "transparent",
           transition: "background-color 0.2s ease",
         }}
         onClick={() => isMobile && setIsActive(!isActive)}
