@@ -15,6 +15,7 @@ import SidebarContent from "../components/sidebar/SidebarContent";
 import RoomClipboard from "../components/sidebar/roomClipboard";
 import ReconnectionSlide from "../components/slides/ReconnectionSlide";
 import socket from "../socket";
+import DownloadSlider from "../components/slides/DownloadSlider";
 
 const drawerWidth = 240;
 
@@ -259,6 +260,8 @@ export default function Playground() {
           retryCount={retryCount}
           roomName={roomName}
         />
+
+        <DownloadSlider/>
       </Main>
     </Box>
   );

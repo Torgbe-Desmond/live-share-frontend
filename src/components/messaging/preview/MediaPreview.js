@@ -33,22 +33,21 @@ const MediaPreview = ({ media }) => {
         </Typography>
 
         {/* Download Button */}
-        {downloadUrls.map((downloadUrl) => {
-          return (
-            <Button
-              fullWidth
-              variant="outlined"
-              size="small"
-              startIcon={<DownloadIcon />}
-              href={downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{ mt: 1.5 }}
-            >
-              Download
-            </Button>
-          );
-        })}
+        {downloadUrls.map((downloadUrl, index) => (
+          <Button
+            key={`${downloadUrl}-${index}`} 
+            fullWidth
+            variant="outlined"
+            size="small"
+            startIcon={<DownloadIcon />}
+            href={downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ mt: 1.5 }}
+          >
+            Download {index + 1}
+          </Button>
+        ))}
       </CardContent>
     </Card>
   );

@@ -7,6 +7,7 @@ import MessageInput from "../components/messaging/MessageInput";
 import { uploadFile } from "../api/fileApi";
 import useSocketListeners from "../components/useSocketListeners";
 import { getTiktokMedia } from "../api/mediaApi";
+import DownloadSlider from "../components/slides/DownloadSlider";
 
 export default function ChatRoom() {
   const { senderId, roomName, username, users, setUsers, showReconnect } =
@@ -18,6 +19,8 @@ export default function ChatRoom() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [leftMessage, setLeftMessage] = useState("");
   const [joinedMessage, setJoinedMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const fileInputRef = useRef(null);
   const bottomRef = useRef(null);
@@ -81,11 +84,15 @@ export default function ChatRoom() {
 
   const handleCallMedia = async (url, roomName) => {
     try {
+      setIsDownloading(true);
       const messageId = Date.now().toString();
       const payload = await getTiktokMedia(url, roomName, messageId);
+      setIsDownloading(false);
 
       setMessages((prev) => [...prev, payload.data]);
     } catch (error) {
+      setIsDownloading(false);
+      setErrorMessage("Something went wrong, please try again.")
       console.log(error);
     }
   };
@@ -117,6 +124,7 @@ export default function ChatRoom() {
           width: "100%",
         }}
       >
+        <DownloadSlider isDownloading={isDownloading} />
         <Box
           sx={{
             width: { xs: "100%", md: 800 },
@@ -203,6 +211,17 @@ export default function ChatRoom() {
       >
         <Alert onClose={() => setJoinedMessage("")} severity="info">
           {joinedMessage}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={Boolean(errorMessage)}
+        autoHideDuration={4000}
+        onClose={() => setErrorMessage("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setErrorMessage("")} severity="info">
+          {errorMessage}
         </Alert>
       </Snackbar>
     </>
