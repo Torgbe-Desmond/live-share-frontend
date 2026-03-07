@@ -11,16 +11,17 @@ import ChatRoom from "./pages/ChatRoom";
 function App() {
   const theme = useTheme();
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+    const isDark = theme.palette.mode === "dark";
 
   useEffect(() => {
     const meta = document.querySelector("meta[name='theme-color']");
     if (meta) {
       meta.setAttribute(
         "content",
-        prefersDark ? theme.palette.background.default : "#ffffff",
+        isDark ? "#202327" : "#f0f2f5",
       );
     }
-  }, [prefersDark, theme]);
+  }, [prefersDark, theme,isDark]);
 
   return (
     <Router>

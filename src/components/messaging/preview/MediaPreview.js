@@ -13,6 +13,15 @@ const MediaPreview = ({ media }) => {
   const { video } = media;
   const downloadUrls = media?.urls;
 
+  function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
   return (
     <Card sx={{ maxWidth: 300, mt: 1, borderRadius: 2 }}>
       {/* Video Thumbnail */}
@@ -33,9 +42,9 @@ const MediaPreview = ({ media }) => {
         </Typography>
 
         {/* Download Button */}
-        {downloadUrls.map((downloadUrl, index) => (
+       {downloadUrls.map((downloadUrl, index) => (
           <Button
-            key={`${downloadUrl}-${index}`} 
+            key={`${downloadUrl}-${generateRandomString(10)}`} 
             fullWidth
             variant="outlined"
             size="small"
