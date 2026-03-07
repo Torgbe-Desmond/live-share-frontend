@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import {
   Box,
   CssBaseline,
@@ -86,6 +86,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 export default function Playground() {
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const [open, setOpen] = useState(false);
   const [showReconnect, setShowReconnect] = useState(false);
@@ -96,6 +97,7 @@ export default function Playground() {
   const [username, setUsername] = useState(null);
   const [senderId, setSenderId] = useState(null);
   const [users, setUsers] = useState(new Set());
+  const isDark = theme.palette.mode === "dark";
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -189,8 +191,9 @@ export default function Playground() {
         sx={{
           "& .MuiDrawer-paper": {
             border: "none",
-            borderRight: 1,
-            borderColor: "divider",
+            // borderRight: 1,
+            // borderColor: "divider",
+            bgcolor: isDark ? "#202327" : "#f0f2f5",
           },
         }}
         variant="permanent"

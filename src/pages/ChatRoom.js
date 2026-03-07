@@ -1,26 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
-import {
-  Box,
-  List,
-  Snackbar,
-  Alert,
-} from "@mui/material";
+import { Box, List, Snackbar, Alert } from "@mui/material";
 
 import MessageBubble from "../components/messaging/MessageBubble";
 import MessageInput from "../components/messaging/MessageInput";
 import { uploadFile } from "../api/fileApi";
 import useSocketListeners from "../components/useSocketListeners";
+import { getTiktokMedia } from "../api/mediaApi";
 
 export default function ChatRoom() {
-  const {
-    senderId,
-    roomName,
-    username,
-    users,
-    setUsers,
-    showReconnect,
-  } = useOutletContext();
+  const { senderId, roomName, username, users, setUsers, showReconnect } =
+    useOutletContext();
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -39,7 +29,7 @@ export default function ChatRoom() {
     users,
     setUsers,
     setLeftMessage,
-    setJoinedMessage
+    setJoinedMessage,
   );
 
   useEffect(() => {
@@ -59,6 +49,7 @@ export default function ChatRoom() {
       senderId,
       roomName,
       username,
+      media: null,
       replyTo: replyingTo ? { ...replyingTo } : null,
       files: selectedFile ? [{ ...selectedFile, viewed: false }] : [],
       createdAt: new Date().toISOString(),
@@ -88,6 +79,17 @@ export default function ChatRoom() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleCallMedia = async (url, roomName) => {
+    try {
+      const messageId = Date.now().toString();
+      const payload = await getTiktokMedia(url, roomName, messageId);
+
+      setMessages((prev) => [...prev, payload.data]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const markFileAsViewed = (messageId, filePublicId) => {
     setMessages((prev) =>
       prev.map((msg) =>
@@ -95,11 +97,11 @@ export default function ChatRoom() {
           ? {
               ...msg,
               files: msg.files?.map((f) =>
-                f.publicId === filePublicId ? { ...f, viewed: true } : f
+                f.publicId === filePublicId ? { ...f, viewed: true } : f,
               ),
             }
-          : msg
-      )
+          : msg,
+      ),
     );
   };
 
@@ -132,13 +134,20 @@ export default function ChatRoom() {
                 msg={msg}
                 senderId={senderId}
                 onReply={setReplyingTo}
+                handleCallMedia={handleCallMedia}
+                roomName={roomName}
                 onMediaViewed={(filePublicId) =>
                   markFileAsViewed(msg.messageId, filePublicId)
                 }
                 onClickReply={(replyMsg) => {
                   if (replyMsg.replyTo?.messageId) {
-                    const ref = messageRefs.current.get(replyMsg.replyTo.messageId);
-                    ref?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    const ref = messageRefs.current.get(
+                      replyMsg.replyTo.messageId,
+                    );
+                    ref?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
                   }
                 }}
                 ref={(el) => el && messageRefs.current.set(msg.messageId, el)}

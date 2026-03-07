@@ -19,26 +19,26 @@ function ReconnectionSlide({
       >
         <Box
           sx={{
-            position: "fixed",
-            bottom: { xs: 0, sm: 16 }, // slightly higher on larger screens
+            position: "relative",
+            bottom: { xs: 0, sm: 16 }, 
             left: 0,
             right: 0,
             display: "flex",
             justifyContent: "center",
             px: 2,
-            pb: 2, // breathing room from bottom edge
+            pb: 2, 
             zIndex: 1250,
-            pointerEvents: "none", // so clicks go through when not hovering button
+            pointerEvents: "none",
           }}
         >
           <Box
             sx={{
-              pointerEvents: "auto", // only button area receives clicks
+              pointerEvents: "auto", 
               width: "100%",
-              maxWidth: 420, // prevents it from becoming too wide on desktop
+              maxWidth: 420,
               borderRadius: 50,
               boxShadow: "0 8px 32px rgba(0,0,0,0.28)",
-              overflow: "hidden", // for clean rounded corners
+              overflow: "hidden", 
             }}
           >
             <Button

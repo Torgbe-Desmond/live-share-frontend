@@ -30,7 +30,7 @@ export default function MessageControls({
       sx={{
         p: 1,
         display: "flex",
-        flexDirection: "column", // Stack input and controls vertically
+        flexDirection: "column", 
         width: "100%",
         maxWidth: 800,
         mx: "auto",
@@ -38,25 +38,7 @@ export default function MessageControls({
         bgcolor: "background.default",
       }}
     >
-      {/* Input Row */}
-
-      {/* <Box sx={{ display: "flex", gap: 1, px: 1 }}>
-        <IconButton
-          sx={{
-            color: "text.secondary",
-            bgcolor: isDark ? "#202327" : "#f0f2f5",
-            width: 36,
-            height: 36,
-            "&:hover": {
-              color: "#fe2c55",
-              bgcolor: isDark ? "#30363d" : "#e4e6eb",
-            }, // TikTok Pink on hover
-            transition: "color 0.2s",
-          }}
-        >
-          <MusicNoteIcon sx={{ fontSize: 20 }} />
-        </IconButton>
-      </Box> */}
+  
 
       <TextField
         fullWidth
@@ -89,7 +71,7 @@ export default function MessageControls({
           ),
         }}
         sx={{
-          mt: 1, // Space between input and bottom controls
+          mt: 1,
           "& .MuiOutlinedInput-root": {
             borderRadius: "20px",
             bgcolor: isDark ? "#202327" : "#f0f2f5",

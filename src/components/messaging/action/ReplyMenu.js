@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import ReplyIcon from "@mui/icons-material/Reply";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -6,7 +6,14 @@ import { useTheme } from "@mui/material/styles";
 import { Box, Tooltip, useMediaQuery, Paper } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 
-export default function ReplyMenu({ msg, senderId, onReply, msgRef }) {
+export default function ReplyMenu({
+  msg,
+  senderId,
+  onReply,
+  msgRef,
+  handleCallMedia,
+  roomName,
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isOwn = msg?.senderId === senderId;
@@ -14,21 +21,24 @@ export default function ReplyMenu({ msg, senderId, onReply, msgRef }) {
   const [copied, setCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  function getUrlCategory(content) {
+  // Inside your component:
+  const { url, mediaCategory } = useMemo(() => {
     const urlRegex = /https?:\/\/[^\s]+/;
-    const tokens = content.split(" ");
+    const tokens = (msg?.content || "").split(" ");
     const urlToken = tokens.find((token) => urlRegex.test(token));
 
-    if (!urlToken) return "none";
+    if (!urlToken) return { url: null, mediaCategory: "none" };
 
-    // Check the domain
-    if (urlToken.includes("tiktok.com") || urlToken.includes("vm.tiktok.com")) {
-      return "tiktok";
-    }
+    const category =
+      urlToken.includes("tiktok.com") || urlToken.includes("vm.tiktok.com")
+        ? "tiktok"
+        : "generic_link";
 
-    // If it's a valid URL but not TikTok
-    return "generic_link";
-  }
+    return { url: urlToken, mediaCategory: category };
+  }, [msg?.content]);
+
+  console.log("url", url);
+
   const handleCopy = async (e) => {
     try {
       await navigator.clipboard.writeText(msg?.content || "");
@@ -123,14 +133,16 @@ export default function ReplyMenu({ msg, senderId, onReply, msgRef }) {
         name="copy"
       />
 
-      {getUrlCategory(msg?.content || "") === "tiktok" && (
+      {mediaCategory === "tiktok" && (
         <>
           <Box
             sx={{ width: "1px", height: "16px", bgcolor: "divider", mx: 0.3 }}
           />
 
           <ActionButton
-            onClick={() => {}}
+            onClick={() => {
+              handleCallMedia(url, roomName);
+            }}
             icon={<DownloadIcon />}
             name="download"
           />
