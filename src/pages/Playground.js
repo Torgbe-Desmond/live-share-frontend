@@ -15,7 +15,6 @@ import SidebarContent from "../components/sidebar/SidebarContent";
 import RoomClipboard from "../components/sidebar/roomClipboard";
 import ReconnectionSlide from "../components/slides/ReconnectionSlide";
 import socket from "../socket";
-import DownloadSlider from "../components/slides/DownloadSlider";
 
 const drawerWidth = 240;
 
@@ -170,10 +169,10 @@ export default function Playground() {
   const handleLeaveRoom = () => {
     if (roomName && senderId)
       socket.emit("leaveRoom", { roomName, userId: senderId, username });
-    localStorage.removeItem("roomName");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    navigate("/");
+      localStorage.removeItem("roomName");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("username");
+      navigate("/");
   };
 
   return (
