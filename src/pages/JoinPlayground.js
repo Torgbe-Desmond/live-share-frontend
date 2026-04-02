@@ -158,7 +158,7 @@ export default function JoinPlayground() {
       localStorage.setItem("roomName", code);
       localStorage.setItem("username", username.trim());
 
-      socket.emit("joinRoom", { roomName: code, userId: data.userId });
+      socket.emit("joinRoom", { roomName: code, userId: data.userId, username: username.trim() });
 
       navigate("/playground");
     } catch (err) {

@@ -261,7 +261,7 @@ export default function Playground() {
           roomName={roomName}
         />
 
-        <DownloadSlider/>
+        
       </Main>
     </Box>
   );

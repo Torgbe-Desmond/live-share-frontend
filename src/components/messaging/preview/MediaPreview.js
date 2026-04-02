@@ -1,35 +1,19 @@
-import {
-  Typography,
-  Button,
-  Card,
-  CardMedia,
-  CardContent,
-} from "@mui/material";
+import { Typography, Button, Card, CardMedia, CardContent } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 
 const MediaPreview = ({ media }) => {
   if (!media) return null;
 
   const { video } = media;
-  const downloadUrls = media?.urls;
-
-  function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
+  const downloadUrls = Array.isArray(media?.urls) ? media.urls : [];
 
   return (
     <Card sx={{ maxWidth: 300, mt: 1, borderRadius: 2 }}>
-      {/* Video Thumbnail */}
       <CardMedia
         component="img"
         height="160"
         image={video?.thumbnail}
-        alt={video?.title}
+        alt={video?.title || "Media"}
         sx={{ objectFit: "cover" }}
       />
 
@@ -41,15 +25,14 @@ const MediaPreview = ({ media }) => {
           @{video?.username}
         </Typography>
 
-        {/* Download Button */}
-       {downloadUrls.map((downloadUrl, index) => (
+        {downloadUrls.map((url, index) => (
           <Button
-            key={`${downloadUrl}-${generateRandomString(10)}`} 
+            key={`${url}-${index}`}
             fullWidth
             variant="outlined"
             size="small"
             startIcon={<DownloadIcon />}
-            href={downloadUrl}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
             sx={{ mt: 1.5 }}

@@ -32,6 +32,7 @@ export default function SidebarContent({
         flexDirection: "column",
         justifyContent: "space-between",
         overflow: "hidden",
+        
       }}
     >
       {/* --- TOP SECTION: ONLINE USERS --- */}

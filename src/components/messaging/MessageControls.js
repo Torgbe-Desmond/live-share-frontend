@@ -1,12 +1,26 @@
+import { useState, useRef } from "react";
 import {
   Box,
   TextField,
   IconButton,
   InputAdornment,
+  Tooltip,
   useTheme,
+  Paper,
+  Grow,
+  ClickAwayListener,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-// import MusicNoteIcon from "@mui/icons-material/MusicNote"; // TikTok-style icon
+import AddIcon from "@mui/icons-material/Add";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import ImageIcon from "@mui/icons-material/Image";
+import { buildSelectedFile } from "../../utils/buildSelectedFile";
+import { addFileToSelection } from "../../utils/addFileToSelection";
+
+const ACTIONS = [
+  { key: "image", label: "Image", icon: <ImageIcon fontSize="small" /> },
+  { key: "file", label: "File", icon: <AttachFileIcon fontSize="small" /> },
+];
 
 export default function MessageControls({
   message,
@@ -14,9 +28,12 @@ export default function MessageControls({
   onSend,
   selectedFilesCount,
   setSelectedFiles,
+  fileInputRef,
+  imageInputRef,
 }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -25,12 +42,28 @@ export default function MessageControls({
     }
   };
 
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const rawFile of files) {
+      const built = await buildSelectedFile(rawFile);
+      addFileToSelection(built, setSelectedFiles);
+    }
+    e.target.value = "";
+  };
+
+  const handleActionClick = (key) => {
+    setMenuOpen(false);
+    if (key === "image") imageInputRef?.current?.click();
+    if (key === "file") fileInputRef?.current?.click();
+  };
+
   return (
     <Box
       sx={{
         p: 1,
         display: "flex",
-        flexDirection: "column", 
+        alignItems: "flex-end",
+        gap: 0.5,
         width: "100%",
         maxWidth: 800,
         mx: "auto",
@@ -38,7 +71,9 @@ export default function MessageControls({
         bgcolor: "background.default",
       }}
     >
-  
+      {/* Hidden inputs */}
+      <input type="file" accept="image/*" multiple hidden ref={imageInputRef} onChange={handleFileChange} />
+      <input type="file" multiple hidden ref={fileInputRef} onChange={handleFileChange} />
 
       <TextField
         fullWidth
@@ -49,6 +84,70 @@ export default function MessageControls({
         multiline
         maxRows={4}
         InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              {/* Anchor wrapper — menu positions relative to this */}
+              <ClickAwayListener onClickAway={() => setMenuOpen(false)}>
+                <Box sx={{ position: "relative" }}>
+                  <Tooltip title="Add attachment" placement="top">
+                    <IconButton
+                      size="small"
+                      onClick={() => setMenuOpen((prev) => !prev)}
+                      sx={{
+                        color: menuOpen ? "primary.main" : "text.secondary",
+                        transition: "transform 0.25s ease, color 0.2s",
+                        transform: menuOpen ? "rotate(45deg)" : "rotate(0deg)",
+                      }}
+                    >
+                      <AddIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+
+                  {/* Menu grows upward from the + button */}
+                  <Grow in={menuOpen} style={{ transformOrigin: "bottom left" }}>
+                    <Paper
+                      elevation={4}
+                      sx={{
+                        position: "absolute",
+                        bottom: "calc(100% + 8px)",
+                        left: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                        p: 0.75,
+                        borderRadius: 3,
+                        minWidth: 44,
+                        bgcolor: "background.paper",
+                        border: `1px solid ${theme.palette.divider}`,
+                        zIndex: 10,
+                      }}
+                    >
+                      {ACTIONS.map(({ key, label, icon }) => (
+                        <Tooltip key={key} title={label} placement="right" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleActionClick(key)}
+                            sx={{
+                              color: "text.secondary",
+                              borderRadius: 2,
+                              "&:hover": {
+                                color: "primary.main",
+                                bgcolor: isDark
+                                  ? "rgba(255,255,255,0.06)"
+                                  : "rgba(0,0,0,0.04)",
+                              },
+                            }}
+                          >
+                            {icon}
+                          </IconButton>
+                        </Tooltip>
+                      ))}
+                    </Paper>
+                  </Grow>
+                </Box>
+              </ClickAwayListener>
+            </InputAdornment>
+          ),
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
@@ -71,7 +170,6 @@ export default function MessageControls({
           ),
         }}
         sx={{
-          mt: 1,
           "& .MuiOutlinedInput-root": {
             borderRadius: "20px",
             bgcolor: isDark ? "#202327" : "#f0f2f5",

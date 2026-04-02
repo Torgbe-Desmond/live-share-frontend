@@ -1,21 +1,16 @@
+import { useRef } from "react";
 import ReplyPreview from "./preview/ReplyPreview";
 import UploadedFilesPreview from "./preview/UploadedFilesPreview";
 import MessageControls from "./MessageControls";
-// import { ChatDemo } from "./DockedChatWindows";
 
 export default function MessageInput(props) {
-  const {
-    fileInputRef,
-    replyingTo,
-    setReplyingTo,
-    setSelectedFiles,
-    selectedFiles,
-  } = props;
+  const { replyingTo, setReplyingTo, setSelectedFiles, selectedFiles } = props;
+
+  const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   return (
     <div style={{ background: "transparent" }}>
-      <input type="file" multiple hidden ref={fileInputRef} />
-
       <ReplyPreview replyingTo={replyingTo} setReplyingTo={setReplyingTo} />
 
       <UploadedFilesPreview
@@ -23,7 +18,11 @@ export default function MessageInput(props) {
         selectedFiles={selectedFiles}
       />
 
-      <MessageControls {...props} />
+      <MessageControls
+        {...props}
+        fileInputRef={fileInputRef}
+        imageInputRef={imageInputRef}
+      />
     </div>
   );
 }

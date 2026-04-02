@@ -12,7 +12,7 @@ export default function GenericFilePreview({
   const [revealed, setRevealed] = useState(!restrictedViewOnce);
 
   useEffect(() => {
-    if (restrictedViewOnce && !revealed)  {
+    if (restrictedViewOnce && !revealed) {
       // mark as viewed after revealing
       const timer = setTimeout(() => {
         setRevealed(true);
@@ -24,19 +24,34 @@ export default function GenericFilePreview({
 
   const fileName = file.originalname || file.name || "attachment";
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const url = file.path || (file.file && URL.createObjectURL(file.file));
     if (!url) return;
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      // 1. Fetch the file data
+      const response = await fetch(url);
+      const blob = await response.blob();
 
-    // If it was a local object URL, revoke it after download
-    if (file.file) URL.revokeObjectURL(url);
+      // 2. Create a local URL for the blob data
+      const file_url = window.URL.createObjectURL(blob);
+
+      // 3. Create the temporary link
+      const link = document.createElement("a");
+      link.href = file_url;
+      link.download = fileName; // Now the browser WILL respect this
+
+      document.body.appendChild(link);
+      link.click();
+
+      // 4. Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(file_url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback: try opening in new tab if fetch fails (CORS issue)
+      window.open(url, "_blank");
+    }
   };
 
   if (restrictedViewOnce && !revealed) {
@@ -70,7 +85,7 @@ export default function GenericFilePreview({
       borderRadius={2}
       overflow="hidden"
       sx={{
-        border: restrictedViewOnce ? "2px dashed #d32f2f" : "2px solid #ccc",
+        border: restrictedViewOnce ? "2px dashed #d32f2f" : "",
         p: 1.5,
         display: "flex",
         alignItems: "center",

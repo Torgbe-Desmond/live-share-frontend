@@ -7,6 +7,8 @@ import {
   Fade
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import DescriptionIcon from "@mui/icons-material/Description";
+
 
 export default function ReplyPreview({ replyingTo, setReplyingTo }) {
   const theme = useTheme();
@@ -23,6 +25,76 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
     return <>{firstLine}</>;
   }
 
+  function FileThumb({ file }) {
+    if (file.type?.startsWith("image/")) {
+      return (
+        <Box
+          component="img"
+          src={file.path}
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: 1.5,
+            objectFit: "cover",
+            mr: 1.5,
+            border: "1px solid rgba(0,0,0,0.05)",
+            bgcolor: "grey.200",
+            flexShrink: 0,
+          }}
+        />
+      );
+    }
+
+    if (file.type?.startsWith("video/")) {
+      return (
+        <Box
+          component="video"
+          src={file.path}
+          muted
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: 1.5,
+            objectFit: "cover",
+            mr: 1.5,
+            border: "1px solid rgba(0,0,0,0.05)",
+            bgcolor: "grey.200",
+            flexShrink: 0,
+          }}
+        />
+      );
+    }
+
+    // Generic file
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          mr: 1.5,
+          flexShrink: 0,
+        }}
+      >
+        <DescriptionIcon sx={{ fontSize: 28, color: "#616161" }} />
+        <Typography
+          variant="caption"
+          sx={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: 80,
+            color: "text.secondary",
+          }}
+        >
+          {file.originalname || file.name}
+        </Typography>
+      </Box>
+    );
+  }
+
+  const previewFile = replyingTo.files?.filter((f) => !f.local)?.[0];
+
   return (
     <Fade in={!!replyingTo}>
       <Box
@@ -30,8 +102,7 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
           display: "flex",
           alignItems: "center",
           p: "8px 12px",
-          // Soft blue tint to separate it from the white background
-          bgcolor: "rgba(25, 118, 210, 0.04)", 
+          bgcolor: "rgba(25, 118, 210, 0.04)",
           borderLeft: `4px solid ${theme.palette.primary.main}`,
           borderTopLeftRadius: "8px",
           borderTopRightRadius: "8px",
@@ -39,31 +110,13 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
           maxWidth: 800,
           mx: "auto",
           position: "relative",
-          mb: "-1px", // Connects visually to the input field border
+          mb: "-1px",
         }}
       >
-        {/* Media Preview Section */}
-        {replyingTo.files?.length > 0 &&
-          replyingTo.files
-            .filter((file) => !file.local)
-            .slice(0, 1) // Only show the first image in preview to save space
-            .map((file) => (
-              <Box
-                key={file.path}
-                component="img"
-                src={file.path}
-                sx={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 1.5,
-                  objectFit: "cover",
-                  mr: 1.5,
-                  border: "1px solid rgba(0,0,0,0.05)",
-                  bgcolor: "grey.200"
-                }}
-              />
-            ))}
+        {/* File thumbnail */}
+        {previewFile && <FileThumb file={previewFile} />}
 
+        {/* Text */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="caption"
@@ -87,7 +140,10 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
               textOverflow: "ellipsis",
             }}
           >
-            <TruncatedText text={replyingTo.content} maxLength={isMobile ? 80 : 150} />
+            <TruncatedText
+              text={replyingTo.content}
+              maxLength={isMobile ? 80 : 150}
+            />
           </Typography>
         </Box>
 

@@ -5,7 +5,7 @@ import {
   Slider,
   Stack,
   Typography,
-  useMediaQuery,
+  Fade,
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -13,14 +13,22 @@ import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import { alpha, useTheme } from "@mui/material/styles";
-import VideoFooter from "./VideoFooter";
-import { useRef } from "react";
-import VideoHeader from "./VideoHeader";
+import CloseIcon from "@mui/icons-material/Close";
+import { useRef, useState } from "react";
+import DownloadIcon from "@mui/icons-material/Download";
+
+const formatTime = (seconds) => {
+  if (!seconds || isNaN(seconds)) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+};
 
 export default function VideoContent({
   videoRef,
   url,
+  title,
+  file,
   isPlaying,
   isMuted,
   isLoading,
@@ -32,46 +40,86 @@ export default function VideoContent({
   onToggleMute,
   onToggleFullscreen,
   onSeek,
+  onClose,
   showControls = true,
 }) {
   const containerRef = useRef(null);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const hideTimer = useRef(null);
 
   const handleToggleFullscreen = () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement)
-      containerRef.current.requestFullscreen().catch(() => {});
-    else document.exitFullscreen().catch(() => {});
-    onToggleFullscreen(); // update parent state
+      containerRef.current.requestFullscreen().catch(() => { });
+    else document.exitFullscreen().catch(() => { });
+    onToggleFullscreen?.();
   };
 
-  const onClose = ()=>{
-    
-  }
+  const showControlsTemporarily = () => {
+    setControlsVisible(true);
+    clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      if (isPlaying) setControlsVisible(false);
+    }, 2800);
+  };
 
-  const formatTime = (seconds) => {
-    if (!seconds) return "0:00";
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    return `${min}:${sec.toString().padStart(2, "0")}`;
+  const handleContainerClick = () => {
+    onPlayPause();
+    showControlsTemporarily();
+  };
+
+  const fileName = file?.originalname || file?.name || "attachment";
+
+  const handleDownload = async () => {
+    if (!url) return;
+
+    try {
+      // 1. Fetch the file data
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      // 2. Create a local URL for the blob data
+      const file_url = window.URL.createObjectURL(blob);
+
+      // 3. Create the temporary link
+      const link = document.createElement("a");
+      link.href = file_url;
+      link.download = fileName; // Now the browser WILL respect this
+
+      document.body.appendChild(link);
+      link.click();
+
+      // 4. Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(file_url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback: try opening in new tab if fetch fails (CORS issue)
+      window.open(url, "_blank");
+    }
   };
 
   return (
     <Box
       ref={containerRef}
+      onMouseMove={showControlsTemporarily}
+      onMouseEnter={() => setControlsVisible(true)}
+      onMouseLeave={() => isPlaying && setControlsVisible(false)}
       sx={{
         position: "relative",
-        width: isMobile ? "100%" : 500,
+        width: "100%",
+        maxWidth: fullscreen ? "100%" : 400,
+        aspectRatio: fullscreen ? "unset" : "16/9",
         height: fullscreen ? "100vh" : "auto",
-        bgcolor: "black",
-        // borderRadius: 2,
+        bgcolor: "#000",
+        borderRadius: fullscreen ? 0 : 2,
         overflow: "hidden",
+        cursor: "pointer",
         mx: "auto",
+        userSelect: "none",
       }}
     >
-      <VideoHeader title="My Video" onClose={onClose} />
-
+      {/* Video element */}
       <video
         ref={videoRef}
         src={url}
@@ -79,14 +127,41 @@ export default function VideoContent({
         muted={isMuted}
         playsInline
         preload="auto"
+        onClick={handleContainerClick}
         style={{
           width: "100%",
           height: "100%",
-          objectFit: fullscreen ? "cover" : "fill",
+          objectFit: fullscreen ? "contain" : "cover",
+          display: "block",
         }}
       />
 
-      {(isLoading || isBuffering) && (
+      {/* Close button (fullscreen / modal mode) */}
+      {onClose && (
+        <Fade in>
+          <IconButton
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              zIndex: 30,
+              bgcolor: "rgba(0,0,0,0.55)",
+              color: "#fff",
+              backdropFilter: "blur(6px)",
+              width: 32,
+              height: 32,
+              "&:hover": { bgcolor: "rgba(0,0,0,0.75)" },
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Fade>
+      )}
+
+      {/* Buffering / loading spinner */}
+      <Fade in={isLoading || isBuffering}>
         <Box
           sx={{
             position: "absolute",
@@ -94,72 +169,82 @@ export default function VideoContent({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: alpha("#000", 0.5),
-            zIndex: 10,
+            zIndex: 15,
+            pointerEvents: "none",
           }}
         >
-          <CircularProgress color="primary" size={fullscreen ? 60 : 48} />
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              bgcolor: "rgba(0,0,0,0.45)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress size={26} thickness={3} sx={{ color: "#fff" }} />
+          </Box>
         </Box>
-      )}
+      </Fade>
 
-      {showControls && !isPlaying && !isLoading && !isBuffering && (
-        <Box
-          onClick={onPlayPause}
-          sx={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: alpha("#000", 0.3),
-            cursor: "pointer",
-            zIndex: 5,
-            "&:hover": { bgcolor: alpha("#000", 0.45) },
-            transition: "background 0.3s",
-          }}
-        >
-          <PlayArrowIcon
-            sx={{ fontSize: fullscreen ? 120 : 80, color: "white" }}
-          />
-        </Box>
-      )}
-
+      {/* Centre play/pause flash */}
       {showControls && (
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1.5}
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            p: 2,
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
-            opacity: 0,
-            transition: "opacity 0.4s",
-            "&:hover": { opacity: 1 },
-            zIndex: 10,
-          }}
-        >
-          <IconButton
-            onClick={onPlayPause}
-            size="small"
-            sx={{ color: "white", p: 0.5 }}
+        <Fade in={!isPlaying && !isLoading && !isBuffering} timeout={200}>
+          <Box
+            onClick={handleContainerClick}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+              pointerEvents: !isPlaying ? "auto" : "none",
+            }}
           >
-            {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-          </IconButton>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                bgcolor: "rgba(0,0,0,0.5)",
+                backdropFilter: "blur(6px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "1.5px solid rgba(255,255,255,0.18)",
+                transition: "transform 0.15s ease",
+                "&:hover": { transform: "scale(1.08)" },
+              }}
+            >
+              <PlayArrowIcon sx={{ color: "#fff", fontSize: 28, ml: "2px" }} />
+            </Box>
+          </Box>
+        </Fade>
+      )}
 
-          <IconButton
-            onClick={onToggleMute}
-            size="small"
-            sx={{ color: "white", p: 0.5 }}
+      {/* Controls bar */}
+      {showControls && (
+        <Fade in={controlsVisible || !isPlaying} timeout={300}>
+          <Box
+            onClick={(e) => e.stopPropagation()}
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 20,
+              px: 1.5,
+              pt: 6,
+              pb: 1.2,
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)",
+            }}
           >
-            {isMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
-          </IconButton>
-
-          <Box sx={{ flex: 1, mx: 1 }}>
+            {/* Progress slider */}
             <Slider
               size="small"
               value={currentTime}
@@ -168,58 +253,94 @@ export default function VideoContent({
               step={0.1}
               onChange={(_, value) => onSeek(value)}
               sx={{
-                color: "white",
-                height: 4,
+                color: "#fff",
+                height: 3,
+                p: "6px 0",
+                mb: 0.5,
                 "& .MuiSlider-thumb": {
-                  width: 14,
-                  height: 14,
-                  transition: "0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  "&:hover, &.Mui-focusVisible": {
-                    boxShadow: "0 0 0 8px rgba(255,255,255,0.16)",
+                  width: 12,
+                  height: 12,
+                  transition: "transform 0.1s",
+                  "&:hover": { transform: "scale(1.4)" },
+                  "&.Mui-focusVisible": {
+                    boxShadow: "0 0 0 6px rgba(255,255,255,0.18)",
                   },
                 },
-                "& .MuiSlider-rail": { opacity: 0.38 },
+                "& .MuiSlider-track": { border: "none" },
+                "& .MuiSlider-rail": { opacity: 0.3, bgcolor: "#fff" },
               }}
             />
 
+            {/* Bottom row: buttons + time */}
             <Stack
               direction="row"
+              alignItems="center"
               justifyContent="space-between"
-              sx={{
-                color: "white",
-                fontSize: "0.75rem",
-                mt: 0.5,
-                opacity: 0.85,
-              }}
             >
-              <Typography variant="caption">
-                {formatTime(currentTime)}
-              </Typography>
-              <Typography variant="caption">{formatTime(duration)}</Typography>
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                {/* Play / Pause */}
+                <IconButton
+                  onClick={onPlayPause}
+                  size="small"
+                  sx={{ color: "#fff", p: 0.6 }}
+                >
+                  {isPlaying
+                    ? <PauseIcon sx={{ fontSize: 20 }} />
+                    : <PlayArrowIcon sx={{ fontSize: 20 }} />}
+                </IconButton>
+
+                {/* Mute */}
+                <IconButton
+                  onClick={onToggleMute}
+                  size="small"
+                  sx={{ color: "#fff", p: 0.6 }}
+                >
+                  {isMuted
+                    ? <VolumeOffIcon sx={{ fontSize: 18 }} />
+                    : <VolumeUpIcon sx={{ fontSize: 18 }} />}
+                </IconButton>
+
+                {/* Download button */}
+                <IconButton
+                  size="small"
+                  onClick={handleDownload}
+                  sx={{ color: "#fff", p: 0.6 }}
+
+                >
+                  <DownloadIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+
+                {/* Timestamp */}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "rgba(255,255,255,0.82)",
+                    fontFamily: "'Tabular', 'SF Mono', monospace",
+                    fontSize: "0.7rem",
+                    letterSpacing: "0.02em",
+                    ml: 0.5,
+                  }}
+                >
+                  {formatTime(currentTime)}
+                  <Box component="span" sx={{ opacity: 0.45, mx: 0.4 }}>/</Box>
+                  {formatTime(duration)}
+                </Typography>
+              </Stack>
+
+              {/* Fullscreen */}
+              <IconButton
+                onClick={handleToggleFullscreen}
+                size="small"
+                sx={{ color: "#fff", p: 0.6 }}
+              >
+                {fullscreen
+                  ? <FullscreenExitIcon sx={{ fontSize: 18 }} />
+                  : <FullscreenIcon sx={{ fontSize: 18 }} />}
+              </IconButton>
             </Stack>
           </Box>
-
-          <IconButton
-            onClick={handleToggleFullscreen}
-            size="small"
-            sx={{ color: "white", p: 0.5 }}
-          >
-            {fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-          </IconButton>
-        </Stack>
+        </Fade>
       )}
-
-      <VideoFooter
-        toggleMute={onToggleMute}
-        isMuted={isMuted}
-        isVideoBuffering={isBuffering}
-        currentTime={currentTime}
-        videoRef={videoRef}
-        duration={duration}
-        isVideoPlaying={isPlaying}
-        onSeek={onSeek}
-        onVideoPress={onPlayPause}
-      />
     </Box>
   );
 }

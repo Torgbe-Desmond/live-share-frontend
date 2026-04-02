@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import ReplayIcon from "@mui/icons-material/Replay";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import DownloadIcon from "@mui/icons-material/Download";
 
 export default function FilePreview({
   file,
@@ -48,6 +49,36 @@ export default function FilePreview({
 
   const isViewOnce = !!file?.viewOnce;
 
+  const fileName = file?.originalname || file?.name || "attachment";
+
+  const handleDownload = async () => {
+    if (!fileSrc) return;
+
+    try {
+      // 1. Fetch the file data
+      const response = await fetch(fileSrc);
+      const blob = await response.blob();
+
+      // 2. Create a local URL for the blob data
+      const url = window.URL.createObjectURL(blob);
+
+      // 3. Create the temporary link
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName; // Now the browser WILL respect this
+
+      document.body.appendChild(link);
+      link.click();
+
+      // 4. Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback: try opening in new tab if fetch fails (CORS issue)
+      window.open(fileSrc, "_blank");
+    }
+  };
   return (
     <Box
       id={file?.publicId}
@@ -55,15 +86,25 @@ export default function FilePreview({
       borderRadius={2}
       overflow="hidden"
       position="relative"
-      sx={{
-        // border: file.isSuccess
-        //   ? "2px solid #4caf50"
-        //   : file.isFailed
-        //   ? "2px solid #f44336"
-        //   : "2px solid transparent",
-        // transition: "border 0.3s",
-      }}
     >
+
+      <IconButton
+        size="small"
+        onClick={handleDownload}
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          bgcolor: isViewOnce ? "primary.main" : "rgba(255,255,255,0.9)",
+          color: isViewOnce ? "white" : "text.primary",
+          boxShadow: 1,
+          "&:hover": { bgcolor: isViewOnce ? "primary.dark" : "white" },
+        }}
+
+      >
+        <DownloadIcon sx={{ fontSize: 18 }} />
+      </IconButton>
+
       {fileSrc && file.type?.startsWith("image/") ? (
         <Box
           component="img"
@@ -142,8 +183,8 @@ export default function FilePreview({
         </Box>
       )}
 
-      {/* Upload overlay */}
-      {!file.isSuccess && (
+      {/* Upload overlay — only for our own locally-sent files awaiting confirmation */}
+      {file.local && !file.isSuccess && (
         <Box
           sx={{
             position: "absolute",

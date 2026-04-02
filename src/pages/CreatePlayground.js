@@ -122,6 +122,7 @@ export default function CreatePlayground() {
       socket.emit("joinRoom", {
         roomName: data.roomName,
         userId: data.userId,
+        username: username.trim(),
       });
 
       navigate("/playground");

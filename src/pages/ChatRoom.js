@@ -22,7 +22,6 @@ export default function ChatRoom() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const fileInputRef = useRef(null);
   const bottomRef = useRef(null);
   const messageRefs = useRef(new Map());
 
@@ -66,7 +65,7 @@ export default function ChatRoom() {
     formData.append("roomName", roomName);
     formData.append("username", username);
     formData.append("messageId", messageId);
-    if (selectedFile) formData.append("file", selectedFile.file);
+    if (selectedFile?.file) formData.append("file", selectedFile.file);
     if (replyingTo) formData.append("replyTo", JSON.stringify(replyingTo));
 
     setSelectedFiles(new Set());
@@ -74,12 +73,26 @@ export default function ChatRoom() {
     setMessage("");
 
     try {
-      await uploadFile(formData);
+      const result = await uploadFile(formData);
+      if (result.success && result.data) {
+        // Replace the local optimistic message with the confirmed server message
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.messageId === messageId ? { ...result.data, files: result.data.files || [] } : msg
+          )
+        );
+      }
     } catch (err) {
       console.error("Upload failed:", err);
+      // Mark file as failed in the local message
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.messageId === messageId
+            ? { ...msg, files: msg.files?.map((f) => ({ ...f, isFailed: true })) || [] }
+            : msg
+        )
+      );
     }
-
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleCallMedia = async (url, roomName) => {
@@ -88,11 +101,14 @@ export default function ChatRoom() {
       const messageId = Date.now().toString();
       const payload = await getTiktokMedia(url, roomName, messageId);
       setIsDownloading(false);
-
-      setMessages((prev) => [...prev, payload.data]);
+      if (payload.success) {
+        setMessages((prev) => [...prev, payload.data]);
+      } else {
+        setErrorMessage("Failed to fetch media. Please try again.");
+      }
     } catch (error) {
       setIsDownloading(false);
-      setErrorMessage("Something went wrong, please try again.")
+      setErrorMessage("Something went wrong, please try again.");
       console.log(error);
     }
   };
@@ -180,7 +196,6 @@ export default function ChatRoom() {
               message={message}
               setMessage={setMessage}
               onSend={handleSend}
-              fileInputRef={fileInputRef}
               selectedFilesCount={selectedFiles.size}
               replyingTo={replyingTo}
               setReplyingTo={setReplyingTo}
@@ -220,7 +235,7 @@ export default function ChatRoom() {
         onClose={() => setErrorMessage("")}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={() => setErrorMessage("")} severity="info">
+        <Alert onClose={() => setErrorMessage("")} severity="error">
           {errorMessage}
         </Alert>
       </Snackbar>

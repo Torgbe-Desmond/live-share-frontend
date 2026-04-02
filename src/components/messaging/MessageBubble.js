@@ -22,7 +22,7 @@ const MessageBubble = forwardRef(
       senderId,
       onReply,
       onMediaViewed,
-      onClicReply,
+      onClickReply,
       handleCallMedia,
       roomName,
     },
@@ -51,7 +51,7 @@ const MessageBubble = forwardRef(
         ref={ref}
         disablePadding
         sx={{
-          px: isMobile ? 1 : 2,
+          px: isMobile ? 1 : 0,
           py: 0.5,
           justifyContent: isOwn ? "flex-end" : "flex-start",
           transition: "background-color 0.2s ease",
@@ -84,13 +84,13 @@ const MessageBubble = forwardRef(
               <Paper
                 elevation={0}
                 sx={{
-                  p: "10px 16px",
+                  p: "0px  ",
                   borderRadius: "20px",
                   borderBottomRightRadius: isOwn ? 4 : 20,
                   borderBottomLeftRadius: isOwn ? 20 : 4,
                   bgcolor: isOwn ? "primary.main" : "background.paper",
                   color: isOwn ? "#fff" : "text.primary",
-                  border: isOwn ? "none" : `1px solid ${theme.palette.divider}`,
+                  // border: isOwn ? "none" : `1px solid ${theme.palette.divider}`,
                   boxShadow: "none",
                   transition: "transform 0.1s ease",
                   "&:active": { transform: "scale(0.98)" },
@@ -102,14 +102,15 @@ const MessageBubble = forwardRef(
                   </Typography>
                 )}
 
-                <MessageReplyPreview msg={msg} isOwn={isOwn} onClicReply={onClicReply} />
+                <MessageReplyPreview msg={msg} isOwn={isOwn} onClickReply={onClickReply} />
+
+                <MessageMediaList files={msg.files} isOwn={isOwn} />
 
                 {msg.content !== "" && (
-                  <Box sx={{ mt: 0.5 }}>
+                  <Box sx={{ mt: 0.5, p:2 }}>
                     <MessageText content={msg.content} />
                   </Box>
                 )}
-                <MessageMediaList files={msg.files} isOwn={isOwn} />
               </Paper>
 
               <Typography

@@ -22,8 +22,10 @@ export default function Video({ url }) {
       setIsBuffering(false);
     };
     const onLoadStart = () => setIsLoading(true);
-    const onLoadedMetadata = () =>
-      setIsLoading(false) && setDuration(video.duration || 0);
+    const onLoadedMetadata = () => {
+      setIsLoading(false);
+      setDuration(video.duration || 0);
+    };
     const onTimeUpdate = () => setCurrentTime(video.currentTime);
 
     video.addEventListener("waiting", onWaiting);
