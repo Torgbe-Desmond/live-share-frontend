@@ -1,4 +1,4 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip, useTheme } from "@mui/material";
 // import VisibilityIcon from "@mui/icons-material/Visibility";
 // import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CloseIcon from "@mui/icons-material/Close";
@@ -10,8 +10,14 @@ export default function ImageFilePreview({
   isViewOnce = false,
   // onToggleViewOnce,
 }) {
+  const theme = useTheme();
   return (
-    <Box sx={{ position: "relative", flexShrink: 0 }}>
+    <Box sx={{
+      position: 
+      "relative", 
+      flexShrink: 0, 
+      bgcolor: theme.palette.background.paper,
+    }}>
       <Box
         component="img"
         src={URL.createObjectURL(file.file || file)}

@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { useState } from "react";
 import ImageFilePreview from "./ImageFilePreview";
 import VideoFilePreview from "./VideoFilePreview";
@@ -10,6 +10,7 @@ export default function UploadedFilesPreview({
 }) {
   // Track view-once status per file (using publicId or name as key)
   const [viewOnceMap, setViewOnceMap] = useState({});
+  const theme = useTheme();
 
   const handleRemove = (file) => {
     setSelectedFiles((prev) => {
@@ -43,12 +44,14 @@ export default function UploadedFilesPreview({
       sx={{
         display: "flex",
         gap: 1.5,
-        p: 1.5,
+        p: 2,
         overflowX: "auto",
-        bgcolor: "#f8f9fa",
         borderRadius: 2,
-        borderLeft: "4px solid #4caf50",
+        border:"1px solid divider",
+        mb:1,
+        borderLeft: "4px solid #85c3f5",
         maxWidth: "100%",
+        bgcolor: theme.palette.background.paper,
       }}
     >
       {[...selectedFiles].map((file) =>
@@ -69,7 +72,7 @@ export default function UploadedFilesPreview({
             onToggleViewOnce={toggleViewOnce}
           />
         ) : (
-          <OtherFilePreview 
+          <OtherFilePreview
             key={file.publicId}
             file={file}
             onRemove={handleRemove}

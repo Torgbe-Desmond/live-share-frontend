@@ -9,6 +9,8 @@ import {
 import ReplayIcon from "@mui/icons-material/Replay";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DownloadIcon from "@mui/icons-material/Download";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 
 export default function FilePreview({
   file,
@@ -19,8 +21,13 @@ export default function FilePreview({
   onViewed,
 }) {
   const [fileSrc, setFileSrc] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
   const hasTriggeredView = useRef(false);
+  const containerRef = useRef(null);
+  const imageRef = useRef(null);
 
+  // Create object URL for local files
   useEffect(() => {
     let objectUrl;
     if (file.local && file.file instanceof File) {
@@ -35,96 +42,172 @@ export default function FilePreview({
     };
   }, [file]);
 
-  // Receiver: mark as viewed shortly after render (or on click)
+  // Mark as viewed for "View Once" files
   useEffect(() => {
     if (!restrictedViewOnce || hasTriggeredView.current) return;
 
     const timer = setTimeout(() => {
       hasTriggeredView.current = true;
       onViewed?.();
-    }, 1200); // give time to see it – adjust or use onClick instead
+    }, 1200);
 
     return () => clearTimeout(timer);
   }, [restrictedViewOnce, onViewed]);
 
-  const isViewOnce = !!file?.viewOnce;
+  // Listen for fullscreen change (Esc key, etc.)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
 
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const isViewOnce = !!file?.viewOnce;
   const fileName = file?.originalname || file?.name || "attachment";
+  const isImage = fileSrc && file.type?.startsWith("image/");
 
   const handleDownload = async () => {
     if (!fileSrc) return;
-
     try {
-      // 1. Fetch the file data
       const response = await fetch(fileSrc);
       const blob = await response.blob();
-
-      // 2. Create a local URL for the blob data
       const url = window.URL.createObjectURL(blob);
 
-      // 3. Create the temporary link
       const link = document.createElement("a");
       link.href = url;
-      link.download = fileName; // Now the browser WILL respect this
+      link.download = fileName;
 
       document.body.appendChild(link);
       link.click();
 
-      // 4. Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download failed:", error);
-      // Fallback: try opening in new tab if fetch fails (CORS issue)
       window.open(fileSrc, "_blank");
     }
   };
-  
+
+  const handleToggleFullscreen = async () => {
+    if (!containerRef.current || !isImage) return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+  };
+
   return (
     <Box
+      ref={containerRef}
       id={file?.publicId}
       mt={1.2}
       borderRadius={2}
       overflow="hidden"
       position="relative"
+      sx={{
+        bgcolor: "#000",
+        maxWidth: isFullscreen ? "100%" : 400,
+        mx: "auto",
+      }}
     >
+      {/* Fullscreen Button - only show for images */}
+      {isImage && (
+        <IconButton
+          size="small"
+          onClick={handleToggleFullscreen}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: isViewOnce || showViewOnceToggle ? 52 : 8, // shift if other buttons exist
+            bgcolor: "rgba(0,0,0,0.6)",
+            color: "#fff",
+            boxShadow: 1,
+            zIndex: 20,
+            "&:hover": { bgcolor: "rgba(0,0,0,0.85)" },
+          }}
+        >
+          {isFullscreen ? (
+            <FullscreenExitIcon sx={{ fontSize: 18 }} />
+          ) : (
+            <FullscreenIcon sx={{ fontSize: 18 }} />
+          )}
+        </IconButton>
+      )}
 
+      {/* Download Button */}
       <IconButton
         size="small"
         onClick={handleDownload}
         sx={{
           position: "absolute",
-          top: 8,
+          bottom: 8,
           right: 8,
           bgcolor: isViewOnce ? "primary.main" : "rgba(255,255,255,0.9)",
           color: isViewOnce ? "white" : "text.primary",
           boxShadow: 1,
+          zIndex: 20,
           "&:hover": { bgcolor: isViewOnce ? "primary.dark" : "white" },
         }}
-
       >
         <DownloadIcon sx={{ fontSize: 18 }} />
       </IconButton>
 
-      {fileSrc && file.type?.startsWith("image/") ? (
+      {/* View Once Toggle (Sender side) */}
+      {showViewOnceToggle && (
+        <Tooltip title={isViewOnce ? "View once – can only be viewed once" : "Normal – multiple views"}>
+          <IconButton
+            size="small"
+            onClick={() => onToggleViewOnce?.(file)}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 52,
+              bgcolor: isViewOnce ? "primary.main" : "rgba(255,255,255,0.9)",
+              color: isViewOnce ? "white" : "text.primary",
+              boxShadow: 1,
+              zIndex: 20,
+              "&:hover": { bgcolor: isViewOnce ? "primary.dark" : "white" },
+            }}
+          >
+            <VisibilityOffIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {/* Image Preview */}
+      {isImage ? (
         <Box
           component="img"
+          ref={imageRef}
           src={fileSrc}
           alt={file.originalname || "attachment"}
           sx={{
             display: "block",
-            maxWidth: 400,
-            maxHeight: 300,
-            borderRadius: 2,
+            width: "100%",
+            maxHeight: isFullscreen ? "100vh" : 300,
+            objectFit: isFullscreen ? "contain" : "cover",
+            borderRadius: isFullscreen ? 0 : 2,
             filter: isViewOnce || restrictedViewOnce ? "brightness(0.82) contrast(0.92)" : "none",
           }}
         />
       ) : (
+        /* Non-image fallback */
         <Box
           sx={{
             width: "100%",
-            p: 2,
-            bgcolor: "#e0e0e0",
+            p: 3,
+            bgcolor: "#f5f5f5",
             borderRadius: 2,
             textAlign: "center",
             fontSize: 13,
@@ -136,29 +219,6 @@ export default function FilePreview({
           <br />
           <small>{(file.size / 1024 / 1024).toFixed(1)} MB</small>
         </Box>
-      )}
-
-      {/* Sender toggle */}
-      {showViewOnceToggle && (
-        <Tooltip
-          title={isViewOnce ? "View once – can only be viewed once" : "Normal – multiple views"}
-        >
-          <IconButton
-            size="small"
-            onClick={() => onToggleViewOnce?.(file)}
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              bgcolor: isViewOnce ? "primary.main" : "rgba(255,255,255,0.9)",
-              color: isViewOnce ? "white" : "text.primary",
-              boxShadow: 1,
-              "&:hover": { bgcolor: isViewOnce ? "primary.dark" : "white" },
-            }}
-          >
-            <VisibilityOffIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
       )}
 
       {/* View once badge */}
@@ -177,6 +237,7 @@ export default function FilePreview({
             px: 1,
             py: 0.4,
             fontSize: "0.78rem",
+            zIndex: 20,
           }}
         >
           <VisibilityOffIcon fontSize="inherit" />
@@ -184,7 +245,7 @@ export default function FilePreview({
         </Box>
       )}
 
-      {/* Upload overlay — only for our own locally-sent files awaiting confirmation */}
+      {/* Upload overlay for local files */}
       {file.local && !file.isSuccess && (
         <Box
           sx={{
@@ -195,14 +256,13 @@ export default function FilePreview({
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 2,
-            zIndex: 5,
+            zIndex: 30,
           }}
         >
           {file.isFailed ? (
             <IconButton
               onClick={() => onRetry?.(file)}
               sx={{ color: "white", bgcolor: "rgba(0,0,0,0.4)" }}
-              title="Retry"
             >
               <ReplayIcon />
             </IconButton>

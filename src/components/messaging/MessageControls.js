@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -9,6 +9,8 @@ import {
   Paper,
   Grow,
   ClickAwayListener,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,6 +24,8 @@ const ACTIONS = [
   { key: "file", label: "File", icon: <AttachFileIcon fontSize="small" /> },
 ];
 
+const MAX_ALLOWED_MB = 50;
+
 export default function MessageControls({
   message,
   setMessage,
@@ -34,6 +38,8 @@ export default function MessageControls({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const [menuOpen, setMenuOpen] = useState(false);
+  const [fileSizeMessage, setFileSizeMessage] = useState("")
+  const [currentFile, settCurrentFile] = useState(null)
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -42,12 +48,58 @@ export default function MessageControls({
     }
   };
 
+
+  const checkFileSizeFeasibility = (file) => {
+    const isTooLarge = file?.size > MAX_ALLOWED_MB * 1024 * 1024;
+    if (isTooLarge) {
+      return false
+    }
+    return true;
+  }
+
+  const checkFileCountFeasibility = () => {
+    return selectedFilesCount > 1 ? false : true
+  }
+
+
+  useEffect(() => {
+    if (!checkFileCountFeasibility()) {
+      setSelectedFiles(prev => {
+        const oldFiles = [...prev][0]
+        const oneFile = [oldFiles]
+        settCurrentFile(oldFiles)
+        return oneFile
+      })
+      setFileSizeMessage("You can only add one file at a time.")
+    }
+
+    if (!checkFileSizeFeasibility(currentFile)) {
+      setFileSizeMessage("File has to be 10mb or lower.")
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setFileSizeMessage, selectedFilesCount, currentFile, setSelectedFiles])
+
+
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files || []);
     for (const rawFile of files) {
       const built = await buildSelectedFile(rawFile);
+
+      if (!checkFileCountFeasibility()) {
+        setFileSizeMessage("You can only add one file at a time.")
+        return
+      }
+
+      if (!checkFileSizeFeasibility(rawFile)) {
+        setFileSizeMessage("File has to be 10mb or lower.")
+        return
+      }
+
       addFileToSelection(built, setSelectedFiles);
+
     }
+
+
     e.target.value = "";
   };
 
@@ -177,6 +229,19 @@ export default function MessageControls({
           },
         }}
       />
+
+      {/* Notifications */}
+      <Snackbar
+        open={Boolean(fileSizeMessage)}
+        autoHideDuration={4000}
+        onClose={() => setFileSizeMessage("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setFileSizeMessage("")} severity="warning">
+          {fileSizeMessage}
+        </Alert>
+      </Snackbar>
+
     </Box>
   );
 }
