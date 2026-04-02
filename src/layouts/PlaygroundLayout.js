@@ -104,7 +104,6 @@ export default function PlaygroundLayout() {
           </IconButton>
         </DrawerHeader>
       </Drawer>
-
       <Main open={open}>
         {/* Pass state to children via context */}
         <Outlet context={{ open, setUsers, users, senderId, roomName, username }} />

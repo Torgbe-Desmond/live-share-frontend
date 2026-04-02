@@ -20,7 +20,8 @@ export default function LeaveRoomButton({ onLeave }) {
           fontSize: "15px",
           py: 1,
           // Border color matches the error color
-          borderColor: theme.palette.error.main,
+          // borderColor: theme.palette.error.main,
+          border:"none",
           color: theme.palette.error.main,
           "&:hover": {
             // Subtle transparent background on hover, standard X behavior

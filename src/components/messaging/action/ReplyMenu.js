@@ -139,13 +139,7 @@ export default function ReplyMenu({
             sx={{ width: "1px", height: "16px", bgcolor: "divider", mx: 0.3 }}
           />
 
-          <ActionButton
-            onClick={() => {
-              handleCallMedia(url, roomName);
-            }}
-            icon={<DownloadIcon />}
-            name="download"
-          />
+        
         </>
       )}
     </Paper>

@@ -301,7 +301,7 @@ e
           />
         </Box>
       )}
-
+  
       {/* Content */}
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <ChatHeader

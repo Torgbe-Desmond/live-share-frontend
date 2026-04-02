@@ -91,7 +91,7 @@ function GroupChatLayout() {
             onLeaveRoom={handleLeaveRoom}
           />
         </StyledDrawer>
-
+          <div>fuck that shit</div>
         {/* Page Content */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Outlet />

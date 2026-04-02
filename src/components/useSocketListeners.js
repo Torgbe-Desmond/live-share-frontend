@@ -8,6 +8,7 @@ export default function useSocketListeners(
   setUsers,
   setLeftMessage,
   setJoinedMessage,
+  setFilesInChat
 ) {
   const userSocketsRef = useRef({});
 
@@ -39,7 +40,9 @@ export default function useSocketListeners(
         })),
       };
 
-      console.log("enrichedMessage",enrichedMessage)
+      if (data.files && data.files.length > 0) {
+        setFilesInChat(prev => [...prev, ...data.files])
+      }
 
       if (data.senderId !== senderId?.toString()) {
         setMessages((prev) => [...prev, enrichedMessage]);
@@ -49,7 +52,7 @@ export default function useSocketListeners(
         handleUserJoin({ userId: data.senderId, username: data.username });
       }
     },
-    [senderId, setMessages, handleUserJoin],
+    [senderId, setMessages, handleUserJoin, setFilesInChat],
   );
 
   // ─── New: Media viewed event ─────────────
@@ -57,8 +60,6 @@ export default function useSocketListeners(
     ({ messageId, filePublicId, viewerId }) => {
       setMessages((prev) =>
         prev.map((msg) => {
-          // Only update if this is the correct message
-          // (you'll need a unique message.id – see note below)
           if (!msg.id || msg.id !== messageId) return msg;
 
           return {
@@ -70,9 +71,7 @@ export default function useSocketListeners(
         }),
       );
 
-      // Optional: show a small toast/notification for the sender
       if (viewerId !== senderId?.toString()) {
-        // You could add a new state like setViewedNotification(...)
         console.log(`Your view-once media was viewed by someone`);
       }
     },
@@ -102,7 +101,7 @@ export default function useSocketListeners(
     socket.on("receiveMessage", handleReceiveMessage);
     socket.on("userJoined", handleUserJoin);
     socket.on("userLeft", handleUserLeft);
-    socket.on("mediaViewed", handleMediaViewed); // ← new listener
+    socket.on("mediaViewed", handleMediaViewed); 
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);

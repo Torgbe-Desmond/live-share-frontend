@@ -233,6 +233,7 @@ export default function Playground() {
       </Drawer>
 
       <Main open={open}>
+   
         <Outlet
           context={{
             senderId,

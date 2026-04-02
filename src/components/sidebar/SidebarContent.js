@@ -32,7 +32,7 @@ export default function SidebarContent({
         flexDirection: "column",
         justifyContent: "space-between",
         overflow: "hidden",
-        
+
       }}
     >
       {/* --- TOP SECTION: ONLINE USERS --- */}
@@ -48,7 +48,7 @@ export default function SidebarContent({
                     justifyContent: open ? "initial" : "center",
                     px: 2.5,
                     // Subtle Twitter-style hover
-                    "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)" }, 
+                    "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)" },
                   }}
                 >
                   <ListItemAvatar
@@ -61,10 +61,10 @@ export default function SidebarContent({
                   >
                     <Avatar
                       src={`https://robohash.org/${user}?set=set4`}
-                      sx={{ 
-                        width: 34, 
+                      sx={{
+                        width: 34,
                         height: 34,
-                        border: `1px solid ${theme.palette.divider}` 
+                        border: `1px solid ${theme.palette.divider}`
                       }}
                     />
                   </ListItemAvatar>
@@ -134,7 +134,7 @@ export default function SidebarContent({
                   fontSize: "15px",
                   color: "text.primary"
                 }}
-                secondaryTypographyProps={{ 
+                secondaryTypographyProps={{
                   fontSize: "13px",
                   color: "text.secondary" // Twitter Muted Gray
                 }}
@@ -154,10 +154,20 @@ export default function SidebarContent({
               <IconButton
                 onClick={onLeave}
                 sx={{
-                  width: 45,
-                  height: 45,
-                  color: "error.main",
-                  "&:hover": { bgcolor: "rgba(244, 33, 46, 0.1)" },
+                  borderRadius: "9999px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "15px",
+                  py: 1,
+                  // Border color matches the error color
+                  border: `2px solid ${theme.palette.error.main}`,
+                  borderWidth:1,
+                  color: theme.palette.error.main,
+                  "&:hover": {
+                    // Subtle transparent background on hover, standard X behavior
+                    backgroundColor: "rgba(244, 33, 46, 0.1)",
+                    borderColor: theme.palette.error.main,
+                  },
                 }}
               >
                 <LogoutIcon />

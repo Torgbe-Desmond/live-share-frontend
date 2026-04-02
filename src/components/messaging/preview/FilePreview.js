@@ -79,6 +79,7 @@ export default function FilePreview({
       window.open(fileSrc, "_blank");
     }
   };
+  
   return (
     <Box
       id={file?.publicId}

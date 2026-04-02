@@ -6,8 +6,7 @@ import MessageBubble from "../components/messaging/MessageBubble";
 import MessageInput from "../components/messaging/MessageInput";
 import { uploadFile } from "../api/fileApi";
 import useSocketListeners from "../components/useSocketListeners";
-import { getTiktokMedia } from "../api/mediaApi";
-import DownloadSlider from "../components/slides/DownloadSlider";
+import FileDrawer from "../components/header/FileDrawer";
 
 export default function ChatRoom() {
   const { senderId, roomName, username, users, setUsers, showReconnect } =
@@ -20,7 +19,7 @@ export default function ChatRoom() {
   const [leftMessage, setLeftMessage] = useState("");
   const [joinedMessage, setJoinedMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [filesInChat, setFilesInChat] = useState([])
 
   const bottomRef = useRef(null);
   const messageRefs = useRef(new Map());
@@ -32,6 +31,7 @@ export default function ChatRoom() {
     setUsers,
     setLeftMessage,
     setJoinedMessage,
+    setFilesInChat
   );
 
   useEffect(() => {
@@ -75,6 +75,11 @@ export default function ChatRoom() {
     try {
       const result = await uploadFile(formData);
       if (result.success && result.data) {
+
+        // Add file to group chat file list
+        if (result.data.files && result.data.files.length > 0) {
+          setFilesInChat((prev) => [...prev, ...result.data.files])
+        }
         // Replace the local optimistic message with the confirmed server message
         setMessages((prev) =>
           prev.map((msg) =>
@@ -95,34 +100,16 @@ export default function ChatRoom() {
     }
   };
 
-  const handleCallMedia = async (url, roomName) => {
-    try {
-      setIsDownloading(true);
-      const messageId = Date.now().toString();
-      const payload = await getTiktokMedia(url, roomName, messageId);
-      setIsDownloading(false);
-      if (payload.success) {
-        setMessages((prev) => [...prev, payload.data]);
-      } else {
-        setErrorMessage("Failed to fetch media. Please try again.");
-      }
-    } catch (error) {
-      setIsDownloading(false);
-      setErrorMessage("Something went wrong, please try again.");
-      console.log(error);
-    }
-  };
-
   const markFileAsViewed = (messageId, filePublicId) => {
     setMessages((prev) =>
       prev.map((msg) =>
         msg.messageId === messageId
           ? {
-              ...msg,
-              files: msg.files?.map((f) =>
-                f.publicId === filePublicId ? { ...f, viewed: true } : f,
-              ),
-            }
+            ...msg,
+            files: msg.files?.map((f) =>
+              f.publicId === filePublicId ? { ...f, viewed: true } : f,
+            ),
+          }
           : msg,
       ),
     );
@@ -140,7 +127,8 @@ export default function ChatRoom() {
           width: "100%",
         }}
       >
-        <DownloadSlider isDownloading={isDownloading} />
+        {/* <DownloadSlider isDownloading={isDownloading} /> */}
+        <FileDrawer files={filesInChat} />
         <Box
           sx={{
             width: { xs: "100%", md: 800 },
@@ -158,7 +146,6 @@ export default function ChatRoom() {
                 msg={msg}
                 senderId={senderId}
                 onReply={setReplyingTo}
-                handleCallMedia={handleCallMedia}
                 roomName={roomName}
                 onMediaViewed={(filePublicId) =>
                   markFileAsViewed(msg.messageId, filePublicId)

@@ -23,7 +23,6 @@ const MessageBubble = forwardRef(
       onReply,
       onMediaViewed,
       onClickReply,
-      handleCallMedia,
       roomName,
     },
     ref,
@@ -84,13 +83,13 @@ const MessageBubble = forwardRef(
               <Paper
                 elevation={0}
                 sx={{
-                  p: "0px  ",
+                  p: isOwn ? "0px" :"10px 12px",
                   borderRadius: "20px",
                   borderBottomRightRadius: isOwn ? 4 : 20,
                   borderBottomLeftRadius: isOwn ? 20 : 4,
                   bgcolor: isOwn ? "primary.main" : "background.paper",
                   color: isOwn ? "#fff" : "text.primary",
-                  // border: isOwn ? "none" : `1px solid ${theme.palette.divider}`,
+                  border: isOwn ? "none" : `1px solid ${theme.palette.divider}`,
                   boxShadow: "none",
                   transition: "transform 0.1s ease",
                   "&:active": { transform: "scale(0.98)" },
@@ -135,7 +134,6 @@ const MessageBubble = forwardRef(
                     onReply={onReply}
                     roomName={roomName}
                     msgRef={msgRef}
-                    handleCallMedia={handleCallMedia}
                   />
                 </Box>
               )}
