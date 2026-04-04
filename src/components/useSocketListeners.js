@@ -36,11 +36,13 @@ export default function useSocketListeners(
         ...data,
         files: data.files?.map((file) => ({
           ...file,
-          viewed: false, // ← initialize as not viewed
+          viewed: false,
         })),
       };
 
-      if (data.files && data.files.length > 0) {
+      console.log("inside usescoket", data.files)
+
+      if (data.files && data.files.size > 0) {
         setFilesInChat(prev => [...prev, ...data.files])
       }
 
@@ -101,7 +103,7 @@ export default function useSocketListeners(
     socket.on("receiveMessage", handleReceiveMessage);
     socket.on("userJoined", handleUserJoin);
     socket.on("userLeft", handleUserLeft);
-    socket.on("mediaViewed", handleMediaViewed); 
+    socket.on("mediaViewed", handleMediaViewed);
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);

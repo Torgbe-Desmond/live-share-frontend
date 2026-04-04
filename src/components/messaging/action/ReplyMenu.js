@@ -137,7 +137,6 @@ export default function ReplyMenu({
           <Box
             sx={{ width: "1px", height: "16px", bgcolor: "divider", mx: 0.3 }}
           />
-
         
         </>
       )}

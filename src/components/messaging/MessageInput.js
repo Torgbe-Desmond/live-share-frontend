@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Box } from "@mui/material";
 import ReplyPreview from "./preview/ReplyPreview";
 import UploadedFilesPreview from "./preview/UploadedFilesPreview";
 import MessageControls from "./MessageControls";
@@ -10,19 +11,29 @@ export default function MessageInput(props) {
   const imageInputRef = useRef(null);
 
   return (
-    <div style={{ background: "transparent" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        maxWidth: 800,
+        mx: "auto",
+        px: 2,
+        pb: 2,
+        pt: 1,
+        gap: 0.75,
+      }}
+    >
       <ReplyPreview replyingTo={replyingTo} setReplyingTo={setReplyingTo} />
-
       <UploadedFilesPreview
         setSelectedFiles={setSelectedFiles}
         selectedFiles={selectedFiles}
       />
-
       <MessageControls
         {...props}
         fileInputRef={fileInputRef}
         imageInputRef={imageInputRef}
       />
-    </div>
+    </Box>
   );
 }

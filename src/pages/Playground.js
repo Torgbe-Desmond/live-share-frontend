@@ -11,10 +11,10 @@ import {
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-import SidebarContent from "../components/sidebar/SidebarContent";
 import RoomClipboard from "../components/sidebar/roomClipboard";
 import ReconnectionSlide from "../components/slides/ReconnectionSlide";
 import socket from "../socket";
+import Sidebar from "../components/sidebar/Sidebar";
 
 const drawerWidth = 240;
 
@@ -55,24 +55,24 @@ const Drawer = styled(MuiDrawer, {
     borderRight: `1px solid ${theme.palette.divider}`,
     ...(open
       ? {
-          width: drawerWidth,
-          transition: theme.transitions.create("width", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          overflowX: "hidden",
-        }
-      : {
-          transition: theme.transitions.create("width", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          overflowX: "hidden",
-          width: `calc(${theme.spacing(7)} + 1px)`,
-          [theme.breakpoints.up("sm")]: {
-            width: `calc(${theme.spacing(8)} + 1px)`,
-          },
+        width: drawerWidth,
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
         }),
+        overflowX: "hidden",
+      }
+      : {
+        transition: theme.transitions.create("width", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+        overflowX: "hidden",
+        width: `calc(${theme.spacing(7)} + 1px)`,
+        [theme.breakpoints.up("sm")]: {
+          width: `calc(${theme.spacing(8)} + 1px)`,
+        },
+      }),
   },
 }));
 
@@ -169,10 +169,10 @@ export default function Playground() {
   const handleLeaveRoom = () => {
     if (roomName && senderId)
       socket.emit("leaveRoom", { roomName, userId: senderId, username });
-      localStorage.removeItem("roomName");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("username");
-      navigate("/");
+    localStorage.removeItem("roomName");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
+    navigate("/");
   };
 
   return (
@@ -199,8 +199,9 @@ export default function Playground() {
         variant="permanent"
         open={open}
       >
-        <SidebarContent
+        <Sidebar
           open={open}
+          onToggle={() => setOpen(o => !o)}
           users={users}
           username={username}
           roomName={roomName}
@@ -233,7 +234,7 @@ export default function Playground() {
       </Drawer>
 
       <Main open={open}>
-   
+
         <Outlet
           context={{
             senderId,
@@ -261,7 +262,7 @@ export default function Playground() {
           roomName={roomName}
         />
 
-        
+
       </Main>
     </Box>
   );

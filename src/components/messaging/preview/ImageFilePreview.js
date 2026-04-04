@@ -1,81 +1,59 @@
-import { Box, IconButton, Tooltip, useTheme } from "@mui/material";
-// import VisibilityIcon from "@mui/icons-material/Visibility";
-// import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { Box, IconButton, Tooltip, alpha } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
+export default function ImageFilePreview({ file, onRemove, isViewOnce = false }) {
+  const src = file.file instanceof File
+    ? URL.createObjectURL(file.file)
+    : file.path;
 
-export default function ImageFilePreview({
-  file,
-  onRemove,
-  isViewOnce = false,
-  // onToggleViewOnce,
-}) {
-  const theme = useTheme();
   return (
-    <Box sx={{
-      position: 
-      "relative", 
-      flexShrink: 0, 
-      bgcolor: theme.palette.background.paper,
-    }}>
+    <Box
+      sx={{
+        position: "relative",
+        flexShrink: 0,
+        borderRadius: 2,
+        overflow: "hidden",
+        boxShadow: `0 2px 8px ${alpha("#000", 0.12)}`,
+      }}
+    >
       <Box
         component="img"
-        src={URL.createObjectURL(file.file || file)}
+        src={src}
         alt="preview"
         sx={{
-          width: 180,
-          height: 120,
+          width: 100,
+          height: 80,
           objectFit: "cover",
-          borderRadius: 2,
           display: "block",
         }}
       />
 
-      {/* View Once toggle */}
-      {/* <Tooltip
-        title={
-          isViewOnce
-            ? "View once – disappears after being seen"
-            : "Normal – can be viewed multiple times"
-        }
-      >
-        <IconButton
-          size="small"
-          onClick={() => onToggleViewOnce?.(file)}
-          sx={{
-            position: "absolute",
-            top: 6,
-            right: 44,
-            bgcolor: isViewOnce ? "#1976d2" : "rgba(255,255,255,0.9)",
-            color: isViewOnce ? "white" : "inherit",
-            boxShadow: 1,
-            "&:hover": { bgcolor: isViewOnce ? "#1565c0" : "white" },
-          }}
-        >
-          {isViewOnce ? (
-            <VisibilityOffIcon fontSize="small" />
-          ) : (
-            <VisibilityIcon fontSize="small" />
-          )}
-        </IconButton>
-      </Tooltip> */}
+      {/* Gradient overlay */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, transparent 50%)",
+          pointerEvents: "none",
+        }}
+      />
 
-      {/* Remove */}
+      {/* Remove button */}
       <Tooltip title="Remove">
         <IconButton
           size="small"
           onClick={() => onRemove?.(file)}
           sx={{
             position: "absolute",
-            top: 6,
-            right: 6,
-            bgcolor: "rgba(255,255,255,0.9)",
-            color: "error.main",
-            boxShadow: 1,
-            "&:hover": { bgcolor: "#ffebee" },
+            top: 4,
+            right: 4,
+            p: 0.3,
+            bgcolor: "rgba(0,0,0,0.55)",
+            color: "#fff",
+            "&:hover": { bgcolor: "rgba(0,0,0,0.75)" },
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon sx={{ fontSize: 13 }} />
         </IconButton>
       </Tooltip>
 
@@ -83,18 +61,19 @@ export default function ImageFilePreview({
         <Box
           sx={{
             position: "absolute",
-            bottom: 6,
-            left: 6,
-            bgcolor: "#d32f2f",
-            color: "white",
-            fontSize: "0.65rem",
-            fontWeight: "bold",
-            px: 0.8,
-            py: 0.3,
-            borderRadius: 6,
+            bottom: 4,
+            left: 4,
+            bgcolor: "error.main",
+            color: "#fff",
+            fontSize: "0.6rem",
+            fontWeight: 800,
+            px: 0.7,
+            py: 0.2,
+            borderRadius: 1,
+            letterSpacing: "0.05em",
           }}
         >
-          1× VIEW
+          1×
         </Box>
       )}
     </Box>

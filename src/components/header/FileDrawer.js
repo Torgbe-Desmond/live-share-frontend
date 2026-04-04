@@ -58,8 +58,8 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
     return (
         <>
             {/* Open Button - Only show if there are files */}
-            {files.length > 0 && (
-                <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end' }}>
+            {files.size > 0 && (
+                <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end', position: "sticky", top: 10, left: 10 }}>
                     <Tooltip title="View Attachments">
                         <IconButton
                             color="primary"
@@ -83,22 +83,22 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                 open={open}
                 onClose={() => setOpen(false)}
                 PaperProps={{
-                    sx: { 
+                    sx: {
                         width: { xs: '100%', sm: 440 },
                         maxWidth: '100%'
                     },
                 }}
             >
                 {/* Header */}
-                <Box sx={{ 
-                    p: 3, 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                <Box sx={{
+                    p: 3,
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     borderBottom: '1px solid #e0e0e0'
                 }}>
                     <Typography variant="h6" fontWeight={600}>
-                        Attachments ({files.length})
+                        Attachments ({files.size})
                     </Typography>
                     <IconButton onClick={() => setOpen(false)} size="small">
                         <CloseIcon />
@@ -106,17 +106,17 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                 </Box>
 
                 <List sx={{ p: 2, pt: 1 }}>
-                    {files.length === 0 ? (
+                    {files.size === 0 ? (
                         <ListItem>
                             <ListItemText primary="No files available" />
                         </ListItem>
                     ) : (
-                        files.map((file, index) => (
+                        [...files].map((file, index) => (
                             <React.Fragment key={index}>
-                                <ListItem 
-                                    alignItems="flex-start" 
-                                    sx={{ 
-                                        px: 2, 
+                                <ListItem
+                                    alignItems="flex-start"
+                                    sx={{
+                                        px: 2,
                                         py: 2.5,
                                         borderRadius: 2,
                                         mb: 1,
@@ -129,16 +129,16 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                                             <Avatar
                                                 variant="rounded"
                                                 src={file.path}
-                                                sx={{ 
-                                                    width: 64, 
-                                                    height: 64, 
+                                                sx={{
+                                                    width: 64,
+                                                    height: 64,
                                                     borderRadius: 2,
                                                     border: '1px solid #eee'
                                                 }}
                                             />
                                         ) : (
-                                            <Avatar 
-                                                variant="rounded" 
+                                            <Avatar
+                                                variant="rounded"
                                                 sx={{ width: 64, height: 64, bgcolor: '#f0f0f0' }}
                                             >
                                                 {getFileIcon(file)}
@@ -150,8 +150,8 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                                     <ListItemText
                                         sx={{ ml: 2, mr: 1 }}
                                         primary={
-                                            <Typography 
-                                                variant="body1" 
+                                            <Typography
+                                                variant="body1"
                                                 fontWeight={500}
                                                 sx={{
                                                     overflow: 'hidden',
@@ -185,7 +185,7 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                                                 edge="end"
                                                 color="primary"
                                                 onClick={() => handleDownload(file)}
-                                                sx={{ 
+                                                sx={{
                                                     bgcolor: 'primary.light',
                                                     color: 'white',
                                                     '&:hover': { bgcolor: 'primary.main' }

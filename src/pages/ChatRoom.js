@@ -7,6 +7,7 @@ import MessageInput from "../components/messaging/MessageInput";
 import { uploadFile } from "../api/fileApi";
 import useSocketListeners from "../components/useSocketListeners";
 import FileDrawer from "../components/header/FileDrawer";
+import { addFileCount } from "../utils/addFileCount";
 
 export default function ChatRoom() {
   const { senderId, roomName, username, users, setUsers, showReconnect } =
@@ -19,7 +20,7 @@ export default function ChatRoom() {
   const [leftMessage, setLeftMessage] = useState("");
   const [joinedMessage, setJoinedMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [filesInChat, setFilesInChat] = useState([])
+  const [filesInChat, setFilesInChat] = useState(new Set())
 
   const bottomRef = useRef(null);
   const messageRefs = useRef(new Map());
@@ -78,8 +79,9 @@ export default function ChatRoom() {
 
         // Add file to group chat file list
         if (result.data.files && result.data.files.length > 0) {
-          setFilesInChat((prev) => [...prev, ...result.data.files])
+          addFileCount(result.data.files[0], setFilesInChat)
         }
+
         // Replace the local optimistic message with the confirmed server message
         setMessages((prev) =>
           prev.map((msg) =>
@@ -89,13 +91,16 @@ export default function ChatRoom() {
       }
     } catch (err) {
       console.error("Upload failed:", err);
+      setErrorMessage(err.message)
       // Mark file as failed in the local message
       setMessages((prev) =>
-        prev.map((msg) =>
-          msg.messageId === messageId
-            ? { ...msg, files: msg.files?.map((f) => ({ ...f, isFailed: true })) || [] }
-            : msg
-        )
+        prev.map((msg) => {
+          if (msg.messageId === messageId) {
+            return { ...msg, files: msg.files?.map((f) => ({ ...f, isFailed: true })) || [] }
+          } else {
+            return msg
+          }
+        })
       );
     }
   };

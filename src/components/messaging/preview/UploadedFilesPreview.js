@@ -1,28 +1,21 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, alpha, useTheme } from "@mui/material";
 import { useState } from "react";
 import ImageFilePreview from "./ImageFilePreview";
 import VideoFilePreview from "./VideoFilePreview";
 import OtherFilePreview from "./OtherFilePreview";
 
-export default function UploadedFilesPreview({
-  selectedFiles,
-  setSelectedFiles,
-}) {
-  // Track view-once status per file (using publicId or name as key)
-  const [viewOnceMap, setViewOnceMap] = useState({});
+export default function UploadedFilesPreview({ selectedFiles, setSelectedFiles }) {
   const theme = useTheme();
+  const [viewOnceMap, setViewOnceMap] = useState({});
 
   const handleRemove = (file) => {
     setSelectedFiles((prev) => {
-      const newSet = new Set(prev);
-      // Remove the file from the set
-      [...newSet].forEach((f) => {
-        if (f.publicId === file.publicId) newSet.delete(f);
+      const next = new Set(prev);
+      [...next].forEach((f) => {
+        if (f.publicId === file.publicId) next.delete(f);
       });
-      return newSet;
+      return next;
     });
-
-    // Also clean up view-once state
     setViewOnceMap((prev) => {
       const next = { ...prev };
       delete next[file.publicId];
@@ -44,14 +37,21 @@ export default function UploadedFilesPreview({
       sx={{
         display: "flex",
         gap: 1.5,
-        p: 2,
+        p: 1.5,
         overflowX: "auto",
-        borderRadius: 2,
-        border:"1px solid divider",
-        mb:1,
-        borderLeft: "4px solid #85c3f5",
-        maxWidth: "100%",
-        bgcolor: theme.palette.background.paper,
+        borderRadius: "12px 12px 0 0",
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+        borderLeftWidth: 3,
+        borderLeftColor: "primary.main",
+        bgcolor: alpha(theme.palette.primary.main, 0.03),
+        mb: "-1px",
+        // Slim scrollbar
+        "&::-webkit-scrollbar": { height: 4 },
+        "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+        "&::-webkit-scrollbar-thumb": {
+          borderRadius: 4,
+          bgcolor: alpha(theme.palette.divider, 0.5),
+        },
       }}
     >
       {[...selectedFiles].map((file) =>
@@ -78,7 +78,7 @@ export default function UploadedFilesPreview({
             onRemove={handleRemove}
             isViewOnce={!!viewOnceMap[file.publicId]}
           />
-        ),
+        )
       )}
     </Box>
   );

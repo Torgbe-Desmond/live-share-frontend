@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coy } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export function detectCodeLanguage(code) {
   if (!code || typeof code !== "string" || code.trim() === "") return "unknown";
@@ -47,23 +48,58 @@ export function detectCodeLanguage(code) {
   return "text";
 }
 
-/** Proper React component — renders a syntax-highlighted code block. */
-export default function MockCode({ code }) {
+
+
+export default function MockCode({ code, isDark = false, isOwn = false }) {
   const detected = detectCodeLanguage(code);
-  const isCode = detected !== "text" && detected !== "unknown";
+  const isDetected = detected !== "text" && detected !== "unknown";
 
-  if (!isCode) return null;
+  const style = (isDark || isOwn) ? oneDark : coy;
 
-  const prismLang = { jsx: "jsx", tsx: "tsx", javascript: "javascript", typescript: "typescript", python: "python", csharp: "csharp" }[detected] || "plaintext";
+  // ── No language detected → plain preformatted fallback ──
+  if (!isDetected) {
+    return (
+      <Box
+        component="pre"
+        sx={{
+          mt: 0.5,
+          mb: 0.25,
+          px: 1.5,
+          py: 1,
+          borderRadius: "8px",
+          bgcolor: isDark || isOwn ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.05)",
+          fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+          fontSize: "0.82rem",
+          lineHeight: 1.6,
+          overflowX: "auto",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+          color: isOwn ? "rgba(255,255,255,0.9)" : "text.primary",
+          m: 0,
+        }}
+      >
+        {code}
+      </Box>
+    );
+  }
+
+  const prismLang = { jsx: "jsx", tsx: "tsx", javascript: "javascript",
+    typescript: "typescript", python: "python", csharp: "csharp" }[detected] || "plaintext";
 
   return (
-    <Box sx={{ width: "100%", maxWidth: "100%", overflowX: "auto" }}>
+    <Box sx={{ width: "100%", maxWidth: "100%", borderRadius: 1, overflow: "hidden" }}>
       <SyntaxHighlighter
         language={prismLang}
-        style={coy}
+        style={style}
         showLineNumbers={code.split("\n").length > 2}
         wrapLongLines={false}
-        customStyle={{ margin: "0.8em 0", borderRadius: 8, fontSize: "0.85rem", minWidth: "max-content" }}
+        customStyle={{
+          margin: 0,
+          borderRadius: 8,
+          fontSize: "0.82rem",
+          minWidth: "max-content",
+          background: isOwn ? "rgba(0,0,0,0.25)" : undefined,
+        }}
       >
         {String(code).replace(/\n$/, "")}
       </SyntaxHighlighter>

@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
-  TextField,
+  ClickAwayListener,
+  Grow,
   IconButton,
   InputAdornment,
-  Tooltip,
-  useTheme,
   Paper,
-  Grow,
-  ClickAwayListener,
   Snackbar,
-  Alert,
+  TextField,
+  Tooltip,
+  alpha,
+  useTheme,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import AddIcon from "@mui/icons-material/Add";
@@ -20,8 +21,8 @@ import { buildSelectedFile } from "../../utils/buildSelectedFile";
 import { addFileToSelection } from "../../utils/addFileToSelection";
 
 const ACTIONS = [
-  { key: "image", label: "Image", icon: <ImageIcon fontSize="small" /> },
-  { key: "file", label: "File", icon: <AttachFileIcon fontSize="small" /> },
+  { key: "image", label: "Image", icon: <ImageIcon sx={{ fontSize: 16 }} /> },
+  { key: "file", label: "File", icon: <AttachFileIcon sx={{ fontSize: 16 }} /> },
 ];
 
 const MAX_ALLOWED_MB = 50;
@@ -30,6 +31,7 @@ export default function MessageControls({
   message,
   setMessage,
   onSend,
+  selectedFiles,
   selectedFilesCount,
   setSelectedFiles,
   fileInputRef,
@@ -37,69 +39,45 @@ export default function MessageControls({
 }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [fileSizeMessage, setFileSizeMessage] = useState("")
-  const [currentFile, settCurrentFile] = useState(null)
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const canSend = message?.trim() || selectedFilesCount > 0;
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSend();
+      if (canSend) onSend();
     }
   };
 
-
-  const checkFileSizeFeasibility = (file) => {
-    const isTooLarge = file?.size > MAX_ALLOWED_MB * 1024 * 1024;
-    if (isTooLarge) {
-      return false
-    }
-    return true;
-  }
-
-  const checkFileCountFeasibility = () => {
-    return selectedFilesCount > 1 ? false : true
-  }
-
+  const checkFileSize = (file) => file?.size <= MAX_ALLOWED_MB * 1024 * 1024;
 
   useEffect(() => {
-    if (!checkFileCountFeasibility()) {
-      setSelectedFiles(prev => {
-        const oldFiles = [...prev][0]
-        const oneFile = [oldFiles]
-        settCurrentFile(oldFiles)
-        return oneFile
-      })
-      setFileSizeMessage("You can only add one file at a time.")
+    if (selectedFilesCount > 1) {
+      setSelectedFiles((prev) => {
+        const arr = [...prev];
+        return new Set([arr[0]]);
+      });
+      setErrorMessage("Only one file can be attached at a time.");
     }
-
-    if (!checkFileSizeFeasibility(currentFile)) {
-      setFileSizeMessage("File has to be 10mb or lower.")
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setFileSizeMessage, selectedFilesCount, currentFile, setSelectedFiles])
-
+  }, [selectedFilesCount, setSelectedFiles]);
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files || []);
     for (const rawFile of files) {
+      if (selectedFilesCount >= 1) {
+        setErrorMessage("Only one file can be attached at a time.");
+        break;
+      }
+      if (!checkFileSize(rawFile)) {
+        setErrorMessage(`File must be under ${MAX_ALLOWED_MB}MB.`);
+        break;
+      }
       const built = await buildSelectedFile(rawFile);
-
-      if (!checkFileCountFeasibility()) {
-        setFileSizeMessage("You can only add one file at a time.")
-        return
-      }
-
-      if (!checkFileSizeFeasibility(rawFile)) {
-        setFileSizeMessage("File has to be 10mb or lower.")
-        return
-      }
-
       addFileToSelection(built, setSelectedFiles);
-
     }
-
-
     e.target.value = "";
   };
 
@@ -110,89 +88,101 @@ export default function MessageControls({
   };
 
   return (
-    <Box
-      sx={{
-        p: 1,
-        display: "flex",
-        alignItems: "flex-end",
-        gap: 0.5,
-        width: "100%",
-        maxWidth: 800,
-        mx: "auto",
-        borderTop: isDark ? `1px solid ${theme.palette.divider}` : "none",
-        bgcolor: "background.default",
-      }}
-    >
-      {/* Hidden inputs */}
-      <input type="file" accept="image/*" multiple hidden ref={imageInputRef} onChange={handleFileChange} />
-      <input type="file" multiple hidden ref={fileInputRef} onChange={handleFileChange} />
+    <>
+      {/* Hidden file inputs */}
+      <input type="file" accept="image/*" hidden ref={imageInputRef} onChange={handleFileChange} />
+      <input type="file" hidden ref={fileInputRef} onChange={handleFileChange} />
 
       <TextField
         fullWidth
-        placeholder="Type a message..."
+        placeholder="Type a message…"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         multiline
-        maxRows={4}
+        maxRows={5}
+        variant="outlined"
         InputProps={{
           startAdornment: (
-            <InputAdornment position="start">
-              {/* Anchor wrapper — menu positions relative to this */}
+            <InputAdornment position="start" sx={{ alignSelf: "flex-end", mb: 0.5 }}>
               <ClickAwayListener onClickAway={() => setMenuOpen(false)}>
                 <Box sx={{ position: "relative" }}>
-                  <Tooltip title="Add attachment" placement="top">
+                  <Tooltip title="Attach" placement="top" arrow>
                     <IconButton
                       size="small"
-                      onClick={() => setMenuOpen((prev) => !prev)}
+                      onClick={() => setMenuOpen((p) => !p)}
                       sx={{
-                        color: menuOpen ? "primary.main" : "text.secondary",
-                        transition: "transform 0.25s ease, color 0.2s",
+                        width: 30,
+                        height: 30,
+                        color: menuOpen ? "primary.main" : "text.disabled",
+                        bgcolor: menuOpen
+                          ? alpha(theme.palette.primary.main, 0.1)
+                          : "transparent",
+                        borderRadius: "8px",
+                        border: `1px solid ${menuOpen ? alpha(theme.palette.primary.main, 0.3) : "transparent"}`,
                         transform: menuOpen ? "rotate(45deg)" : "rotate(0deg)",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          color: "primary.main",
+                          bgcolor: alpha(theme.palette.primary.main, 0.07),
+                        },
                       }}
                     >
-                      <AddIcon fontSize="small" />
+                      <AddIcon sx={{ fontSize: 17 }} />
                     </IconButton>
                   </Tooltip>
 
-                  {/* Menu grows upward from the + button */}
+                  {/* Attachment popover */}
                   <Grow in={menuOpen} style={{ transformOrigin: "bottom left" }}>
                     <Paper
-                      elevation={4}
+                      elevation={8}
                       sx={{
                         position: "absolute",
-                        bottom: "calc(100% + 8px)",
+                        bottom: "calc(100% + 10px)",
                         left: 0,
                         display: "flex",
                         flexDirection: "column",
-                        gap: 0.5,
-                        p: 0.75,
-                        borderRadius: 3,
-                        minWidth: 44,
-                        bgcolor: "background.paper",
-                        border: `1px solid ${theme.palette.divider}`,
-                        zIndex: 10,
+                        gap: 0.25,
+                        p: 0.5,
+                        borderRadius: "12px",
+                        minWidth: 130,
+                        bgcolor: isDark
+                          ? alpha(theme.palette.background.paper, 0.97)
+                          : "#fff",
+                        border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                        backdropFilter: "blur(12px)",
+                        boxShadow: `0 8px 24px ${alpha("#000", isDark ? 0.5 : 0.12)}`,
+                        zIndex: 20,
                       }}
                     >
                       {ACTIONS.map(({ key, label, icon }) => (
-                        <Tooltip key={key} title={label} placement="right" arrow>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleActionClick(key)}
-                            sx={{
-                              color: "text.secondary",
-                              borderRadius: 2,
-                              "&:hover": {
-                                color: "primary.main",
-                                bgcolor: isDark
-                                  ? "rgba(255,255,255,0.06)"
-                                  : "rgba(0,0,0,0.04)",
-                              },
-                            }}
-                          >
-                            {icon}
-                          </IconButton>
-                        </Tooltip>
+                        <Box
+                          key={key}
+                          component="button"
+                          onClick={() => handleActionClick(key)}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            px: 1.5,
+                            py: 0.875,
+                            borderRadius: "8px",
+                            border: "none",
+                            bgcolor: "transparent",
+                            color: "text.secondary",
+                            fontSize: "0.82rem",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                            "&:hover": {
+                              bgcolor: alpha(theme.palette.primary.main, 0.08),
+                              color: "primary.main",
+                            },
+                          }}
+                        >
+                          {icon}
+                          {label}
+                        </Box>
                       ))}
                     </Paper>
                   </Grow>
@@ -200,48 +190,78 @@ export default function MessageControls({
               </ClickAwayListener>
             </InputAdornment>
           ),
+
           endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                onClick={onSend}
-                disabled={!message?.trim() && selectedFilesCount === 0}
-                sx={{
-                  bgcolor:
-                    message?.trim() || selectedFilesCount > 0
-                      ? "primary.main"
-                      : "action.disabledBackground",
-                  color: "white",
-                  width: 32,
-                  height: 32,
-                  "&:hover": { bgcolor: "primary.dark" },
-                }}
-              >
-                <SendIcon sx={{ fontSize: 16 }} />
-              </IconButton>
+            <InputAdornment position="end" sx={{ alignSelf: "flex-end", mb: 0.5 }}>
+              <Tooltip title={canSend ? "Send" : ""} placement="top" arrow>
+                <span>
+                  <IconButton
+                    onClick={onSend}
+                    disabled={!canSend}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "9px",
+                      bgcolor: canSend ? "primary.main" : "transparent",
+                      border: `1px solid ${canSend ? "transparent" : alpha(theme.palette.divider, 0.5)}`,
+                      color: canSend ? "#fff" : "text.disabled",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        bgcolor: canSend ? "primary.dark" : alpha(theme.palette.action.hover, 0.4),
+                      },
+                      "&:active": { transform: "scale(0.92)" },
+                      "&.Mui-disabled": { bgcolor: "transparent", color: "text.disabled" },
+                    }}
+                  >
+                    <SendIcon sx={{ fontSize: 15 }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </InputAdornment>
           ),
         }}
         sx={{
           "& .MuiOutlinedInput-root": {
-            borderRadius: "20px",
-            bgcolor: isDark ? "#202327" : "#f0f2f5",
-            "& fieldset": { border: "none" },
+            borderRadius: "16px",
+            bgcolor: isDark ? alpha("#fff", 0.04) : "#fff",
+            fontSize: "0.9rem",
+            alignItems: "flex-end",
+            "& fieldset": {
+              borderColor: alpha(theme.palette.divider, isDark ? 0.5 : 0.8),
+              transition: "border-color 0.2s, box-shadow 0.2s",
+            },
+            "&:hover fieldset": {
+              borderColor: alpha(theme.palette.primary.main, 0.4),
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: theme.palette.primary.main,
+              borderWidth: "1px",
+              boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}`,
+            },
+          },
+          "& .MuiInputBase-input": {
+            py: 1.1,
+            "&::placeholder": { color: "text.disabled", opacity: 1 },
           },
         }}
       />
 
-      {/* Notifications */}
+      {/* Error snackbar */}
       <Snackbar
-        open={Boolean(fileSizeMessage)}
+        open={Boolean(errorMessage)}
         autoHideDuration={4000}
-        onClose={() => setFileSizeMessage("")}
+        onClose={() => setErrorMessage("")}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={() => setFileSizeMessage("")} severity="warning">
-          {fileSizeMessage}
+        <Alert
+          onClose={() => setErrorMessage("")}
+          severity="warning"
+          variant="filled"
+          sx={{ borderRadius: 3, fontSize: "0.82rem" }}
+        >
+          {errorMessage}
         </Alert>
       </Snackbar>
-
-    </Box>
+    </>
   );
 }

@@ -22,7 +22,7 @@ export default function FilePreview({
 }) {
   const [fileSrc, setFileSrc] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
+
   const hasTriggeredView = useRef(false);
   const containerRef = useRef(null);
   const imageRef = useRef(null);

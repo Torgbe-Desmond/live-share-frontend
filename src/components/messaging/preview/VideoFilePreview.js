@@ -1,59 +1,34 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
-// import VisibilityIcon from "@mui/icons-material/Visibility";
-// import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { Box, IconButton, Tooltip, alpha } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-export default function VideoFilePreview({
-  file,
-  onRemove,
-  isViewOnce = false,
-  onToggleViewOnce,
-}) {
+export default function VideoFilePreview({ file, onRemove, isViewOnce = false }) {
+  const src = file.file instanceof File
+    ? URL.createObjectURL(file.file)
+    : file.path;
+
   return (
-    <Box sx={{ position: "relative", flexShrink: 0 }}>
+    <Box
+      sx={{
+        position: "relative",
+        flexShrink: 0,
+        borderRadius: 2,
+        overflow: "hidden",
+        boxShadow: `0 2px 8px ${alpha("#000", 0.15)}`,
+      }}
+    >
       <Box
         component="video"
-        src={URL.createObjectURL(file.file || file)}
+        src={src}
         controls
         muted
         sx={{
-          width: 180,
-          height: 120,
+          width: 130,
+          height: 80,
           objectFit: "cover",
-          borderRadius: 2,
           display: "block",
-          bgcolor: "black",
+          bgcolor: "#000",
         }}
       />
-
-      {/* View Once toggle */}
-      {/* <Tooltip
-        title={
-          isViewOnce
-            ? "View once – disappears after being seen"
-            : "Normal – can be replayed"
-        }
-      >
-        <IconButton
-          size="small"
-          onClick={() => onToggleViewOnce?.(file)}
-          sx={{
-            position: "absolute",
-            top: 6,
-            right: 44,
-            bgcolor: isViewOnce ? "#1976d2" : "rgba(255,255,255,0.9)",
-            color: isViewOnce ? "white" : "inherit",
-            boxShadow: 1,
-            "&:hover": { bgcolor: isViewOnce ? "#1565c0" : "white" },
-          }}
-        >
-          {isViewOnce ? (
-            <VisibilityOffIcon fontSize="small" />
-          ) : (
-            <VisibilityIcon fontSize="small" />
-          )}
-        </IconButton>
-      </Tooltip> */}
 
       {/* Remove button */}
       <Tooltip title="Remove">
@@ -62,36 +37,35 @@ export default function VideoFilePreview({
           onClick={() => onRemove?.(file)}
           sx={{
             position: "absolute",
-            top: 6,
-            right: 6,
-            bgcolor: "rgba(255,255,255,0.9)",
-            color: "error.main",
-            boxShadow: 1,
-            "&:hover": { bgcolor: "#ffebee" },
+            top: 4,
+            right: 4,
+            p: 0.3,
+            bgcolor: "rgba(0,0,0,0.55)",
+            color: "#fff",
+            "&:hover": { bgcolor: "rgba(0,0,0,0.75)" },
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon sx={{ fontSize: 13 }} />
         </IconButton>
       </Tooltip>
 
-      {/* Optional: small badge when view-once is active */}
       {isViewOnce && (
         <Box
           sx={{
             position: "absolute",
-            bottom: 6,
-            left: 6,
-            bgcolor: "#d32f2f",
-            color: "white",
-            fontSize: "0.65rem",
-            fontWeight: "bold",
-            px: 0.8,
-            py: 0.3,
-            borderRadius: 6,
-            lineHeight: 1,
+            bottom: 4,
+            left: 4,
+            bgcolor: "error.main",
+            color: "#fff",
+            fontSize: "0.6rem",
+            fontWeight: 800,
+            px: 0.7,
+            py: 0.2,
+            borderRadius: 1,
+            letterSpacing: "0.05em",
           }}
         >
-          1× VIEW
+          1×
         </Box>
       )}
     </Box>
