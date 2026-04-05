@@ -5,4 +5,5 @@ export const API_BASE =
 
 export const API_URL =
   process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test"
-    ? "http://localhost:8000/code-detect/predict" : "https://models-0chn.onrender.com/predict"
+    ? "https://models-0chn.onrender.com/predict" : "http://localhost:8000/code-detect/predict"
+    
