@@ -8,6 +8,7 @@ import { uploadFile } from "../api/fileApi";
 import useSocketListeners from "../components/useSocketListeners";
 import FileDrawer from "../components/header/FileDrawer";
 import { addFileCount } from "../utils/addFileCount";
+import { buildSelectedFile } from "../utils/buildSelectedFile";
 
 export default function ChatRoom() {
   const { senderId, roomName, username, users, setUsers, showReconnect } =
@@ -32,12 +33,67 @@ export default function ChatRoom() {
     setUsers,
     setLeftMessage,
     setJoinedMessage,
-    setFilesInChat
+    setFilesInChat,
+    addFileCount
   );
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+
+  const handleSendAudio = async (audioFile) => {
+    if (!senderId || !roomName) return;
+
+    const messageId = Date.now().toString();
+
+    const localFile = await buildSelectedFile(audioFile)
+
+    const localMessageObject = {
+      messageId,
+      content: "",
+      senderId,
+      roomName,
+      username,
+      media: null,
+      replyTo: null,
+      files: [localFile],
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, localMessageObject]);
+
+    const formData = new FormData();
+    formData.append("content", "");
+    formData.append("senderId", senderId);
+    formData.append("roomName", roomName);
+    formData.append("username", username);
+    formData.append("messageId", messageId);
+    formData.append("file", audioFile);
+
+    try {
+      const result = await uploadFile(formData);
+      if (result.success && result.data) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.messageId === messageId
+              ? { ...result.data, files: result.data.files || [] }
+              : msg
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Audio upload failed:", err);
+      setErrorMessage(err.message);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.messageId === messageId
+            ? { ...msg, files: msg.files.map((f) => ({ ...f, isFailed: true })) }
+            : msg
+        )
+      );
+    }
+  };
 
   const handleSend = async () => {
     if (!senderId || !roomName) return;
@@ -76,12 +132,6 @@ export default function ChatRoom() {
     try {
       const result = await uploadFile(formData);
       if (result.success && result.data) {
-
-        // Add file to group chat file list
-        if (result.data.files && result.data.files.length > 0) {
-          addFileCount(result.data.files[0], setFilesInChat)
-        }
-
         // Replace the local optimistic message with the confirmed server message
         setMessages((prev) =>
           prev.map((msg) =>
@@ -178,7 +228,7 @@ export default function ChatRoom() {
       <Box
         sx={{
           padding: "0px 8px 4px 8px",
-          backgroundColor: "background.paper",
+          backgroundColor: "transparent",
           width: "100%",
         }}
       >
@@ -187,6 +237,7 @@ export default function ChatRoom() {
             <MessageInput
               message={message}
               setMessage={setMessage}
+              onSendAudio={handleSendAudio}
               onSend={handleSend}
               selectedFilesCount={selectedFiles.size}
               replyingTo={replyingTo}

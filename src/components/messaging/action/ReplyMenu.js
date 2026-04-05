@@ -21,7 +21,7 @@ export default function ReplyMenu({
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   // Inside your component:
-  const { url, mediaCategory } = useMemo(() => {
+  const {  mediaCategory } = useMemo(() => {
     const urlRegex = /https?:\/\/[^\s]+/;
     const tokens = (msg?.content || "").split(" ");
     const urlToken = tokens.find((token) => urlRegex.test(token));
@@ -35,8 +35,6 @@ export default function ReplyMenu({
 
     return { url: urlToken, mediaCategory: category };
   }, [msg?.content]);
-
-  console.log("url", url);
 
   const handleCopy = async (e) => {
     try {

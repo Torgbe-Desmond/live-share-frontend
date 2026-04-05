@@ -9,3 +9,4 @@ export function addFileToSelection(file, setSelectedFiles) {
     return newSet;
   });
 }
+

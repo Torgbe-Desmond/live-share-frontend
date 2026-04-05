@@ -2,6 +2,7 @@ import FileMedia from "./FileMedia";
 import ImageMedia from "./ImageMedia";
 import VideoMedia from "./VideoMedia";
 import ViewOnceMedia from "./viewOnce/ViewOnceMedia";
+import AudioMessage from "../audio/AudioMessage";
 
 const MessageMediaItem = ({
   file,
@@ -16,6 +17,7 @@ const MessageMediaItem = ({
   const isViewOnce = !!file.viewOnce;
   const isVideo = file.type?.startsWith("video/");
   const isImage = file.type?.startsWith("image/");
+  const isAudio = file.type?.startsWith("audio/");
 
   if (!isOwn && isViewOnce) {
     return (
@@ -29,6 +31,10 @@ const MessageMediaItem = ({
         setDuration={setDuration}
       />
     );
+  }
+
+  if (isAudio) {
+    return <AudioMessage file={file} isOwn={isOwn} />;
   }
 
   if (isVideo) {

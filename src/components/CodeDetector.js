@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { Box, CircularProgress, Typography, useTheme } from "@mui/material";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, coy } from "react-syntax-highlighter/dist/esm/styles/prism";
-
-const API_URL = ["http://localhost:8000/code-detect/predict", "https://models-0chn.onrender.com/predict"][1]
+import { API_URL } from "../api/URI";
 
 
 export default function CodeDetector({ text, isOwn = false, threshold = 0.75, fallback = null }) {
@@ -29,7 +28,6 @@ export default function CodeDetector({ text, isOwn = false, threshold = 0.75, fa
                 });
                 if (!res.ok) throw new Error(`API error: ${res.status}`);
                 const data = await res.json();
-                console.log("data", data)
                 if (!cancelled) setResult(data);
             } catch (err) {
                 if (!cancelled) setError(err.message);
@@ -103,20 +101,21 @@ export default function CodeDetector({ text, isOwn = false, threshold = 0.75, fa
                 </Typography>
             </Box>
 
-            <SyntaxHighlighter
-                language={language}
-                style={style}
-                showLineNumbers={showLineNumbers}
-                wrapLongLines={false}
-                customStyle={{
-                    margin: 0,
-                    borderRadius: 0,
-                    fontSize: "0.82rem",
-                    // background: isOwn ? "rgba(0,0,0,0.25)" : undefined,
-                }}
-            >
-                {String(text).replace(/\n$/, "")}
-            </SyntaxHighlighter>
+            <Box sx={{ maxWidth: { xs: 200, sm: 250, md: 600, lg: 600 }, overflow: 'auto' }}>
+                <SyntaxHighlighter
+                    language={language}
+                    style={style}
+                    showLineNumbers={showLineNumbers}
+                    wrapLongLines={false}
+                    customStyle={{
+                        margin: 0,
+                        borderRadius: 0,
+                        fontSize: "0.82rem",
+                    }}
+                >
+                    {String(text).replace(/\n$/, "")}
+                </SyntaxHighlighter>
+            </Box>
         </Box>
     );
 }

@@ -8,7 +8,8 @@ export default function useSocketListeners(
   setUsers,
   setLeftMessage,
   setJoinedMessage,
-  setFilesInChat
+  setFilesInChat,
+  addFileCount
 ) {
   const userSocketsRef = useRef({});
 
@@ -40,10 +41,8 @@ export default function useSocketListeners(
         })),
       };
 
-      console.log("inside usescoket", data.files)
-
-      if (data.files && data.files.size > 0) {
-        setFilesInChat(prev => [...prev, ...data.files])
+      if (data.files && data.files.length > 0) {
+        addFileCount(data.files[0], setFilesInChat)
       }
 
       if (data.senderId !== senderId?.toString()) {
@@ -54,7 +53,7 @@ export default function useSocketListeners(
         handleUserJoin({ userId: data.senderId, username: data.username });
       }
     },
-    [senderId, setMessages, handleUserJoin, setFilesInChat],
+    [senderId, setMessages, handleUserJoin, setFilesInChat, addFileCount],
   );
 
   // ─── New: Media viewed event ─────────────

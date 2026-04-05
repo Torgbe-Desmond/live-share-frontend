@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useMediaQuery, ThemeProvider, CssBaseline } from "@mui/material";
 
 import { ThemeMode } from "./Constants";
-import {  AppDarkTheme, AppLightTheme,defaultTheme } from "./Themes";
+import { AppDarkTheme, AppLightTheme, defaultTheme, } from "./Themes";
 import { ThemeContext } from "./Context";
 import ThemeColorUpdater from "./ThemeColorUpdater";
 

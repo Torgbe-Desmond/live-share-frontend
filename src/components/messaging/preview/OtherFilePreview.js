@@ -78,9 +78,9 @@ export default function OtherFilePreview({ file, onRemove, isViewOnce = false })
             top: 4,
             right: 4,
             p: 0.3,
-            bgcolor: alpha(theme.palette.action.hover, 0.8),
-            color: "error.main",
-            "&:hover": { bgcolor: alpha(theme.palette.error.main, 0.1) },
+            bgcolor: "rgba(0,0,0,0.55)",
+            color: "#fff",
+            "&:hover": { bgcolor: "rgba(0,0,0,0.75)" },
           }}
         >
           <CloseIcon sx={{ fontSize: 13 }} />

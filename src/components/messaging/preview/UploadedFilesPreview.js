@@ -44,7 +44,9 @@ export default function UploadedFilesPreview({ selectedFiles, setSelectedFiles }
         borderLeftWidth: 3,
         borderLeftColor: "primary.main",
         bgcolor: alpha(theme.palette.primary.main, 0.03),
-        mb: "-1px",
+        mb: "-5px",
+        mr:2,
+        ml:2,
         // Slim scrollbar
         "&::-webkit-scrollbar": { height: 4 },
         "&::-webkit-scrollbar-track": { bgcolor: "transparent" },

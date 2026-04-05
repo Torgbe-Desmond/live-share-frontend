@@ -69,6 +69,8 @@ export default function ReplyPreview({ replyingTo, setReplyingTo }) {
           gap: 1.5,
           px: 1.5,
           py: 1,
+          mr:2,
+          ml:2,
           borderRadius: "12px 12px 0 0",
           bgcolor: alpha(theme.palette.primary.main, 0.05),
           borderLeft: `3px solid ${theme.palette.primary.main}`,

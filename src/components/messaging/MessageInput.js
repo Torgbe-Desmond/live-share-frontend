@@ -22,6 +22,9 @@ export default function MessageInput(props) {
         pb: 2,
         pt: 1,
         gap: 0.75,
+        "& .css-k552tf ": {
+          background: " transparent !important"
+        }
       }}
     >
       <ReplyPreview replyingTo={replyingTo} setReplyingTo={setReplyingTo} />
