@@ -12,6 +12,7 @@ import {
   alpha,
   useTheme,
 } from "@mui/material";
+
 import SendIcon from "@mui/icons-material/Send";
 import AddIcon from "@mui/icons-material/Add";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -228,14 +229,14 @@ export default function MessageControls({
   const borderColor = recording
     ? alpha(theme.palette.error.main, 0.4)
     : isFocused
-    ? alpha(theme.palette.primary.main, 0.5)
-    : alpha(theme.palette.divider, isDark ? 0.6 : 0.9);
+      ? alpha(theme.palette.primary.main, 0.5)
+      : alpha(theme.palette.divider, isDark ? 0.6 : 0.9);
 
   const glowShadow = recording
     ? `0 0 0 3px ${alpha(theme.palette.error.main, 0.1)}`
     : isFocused
-    ? `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}`
-    : `0 2px 8px ${alpha("#000", isDark ? 0.3 : 0.06)}`;
+      ? `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}`
+      : `0 2px 8px ${alpha("#000", isDark ? 0.3 : 0.06)}`;
 
   return (
     <Box sx={{ px: 2, pb: 2, pt: 1, display: "flex", flexDirection: "column", width: "100%", maxWidth: 800, mx: "auto" }}>
@@ -382,8 +383,6 @@ export default function MessageControls({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
             rows={1}
             sx={{
               flex: 1,
@@ -403,6 +402,10 @@ export default function MessageControls({
               "&::-webkit-scrollbar": { width: 4 },
               "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
               "&::-webkit-scrollbar-thumb": { borderRadius: 4, bgcolor: alpha(theme.palette.divider, 0.5) },
+              // ── iOS zoom fix ──
+              "@supports (-webkit-touch-callout: none)": {
+                fontSize: "16px",
+              },
             }}
           />
         )}
