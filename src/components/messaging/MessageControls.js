@@ -11,6 +11,8 @@ import {
   Typography,
   alpha,
   useTheme,
+  useMediaQuery,     // ← Added
+  TextField,
 } from "@mui/material";
 
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +22,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
 import MicIcon from "@mui/icons-material/Mic";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+
 import { buildSelectedFile } from "../../utils/buildSelectedFile";
 import { addFileToSelection } from "../../utils/addFileToSelection";
 
@@ -55,7 +58,11 @@ function AttachmentPill({ file, onRemove, theme }) {
       <Typography noWrap sx={{ fontSize: "0.72rem", fontWeight: 600, color: "primary.main" }}>
         {file?.name ?? "Attachment"}
       </Typography>
-      <IconButton size="small" onClick={onRemove} sx={{ p: 0, color: "primary.main", opacity: 0.7, "&:hover": { opacity: 1 } }}>
+      <IconButton
+        size="small"
+        onClick={onRemove}
+        sx={{ p: 0, color: "primary.main", opacity: 0.7, "&:hover": { opacity: 1 } }}
+      >
         <CloseIcon sx={{ fontSize: 12 }} />
       </IconButton>
     </Box>
@@ -107,6 +114,8 @@ export default function MessageControls({
 }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));   // ← Added for mobile detection
+
   const textareaRef = useRef(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -119,14 +128,6 @@ export default function MessageControls({
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
-  }, [message]);
 
   // Cleanup recorder on unmount
   useEffect(() => {
@@ -159,8 +160,14 @@ export default function MessageControls({
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files || []);
     for (const rawFile of files) {
-      if (!checkFileCount()) { setFileSizeMessage("Only one file can be attached at a time."); break; }
-      if (!checkFileSize(rawFile)) { setFileSizeMessage(`File must be under ${MAX_ALLOWED_MB}MB.`); break; }
+      if (!checkFileCount()) {
+        setFileSizeMessage("Only one file can be attached at a time.");
+        break;
+      }
+      if (!checkFileSize(rawFile)) {
+        setFileSizeMessage(`File must be under ${MAX_ALLOWED_MB}MB.`);
+        break;
+      }
       const built = await buildSelectedFile(rawFile);
       addFileToSelection(built, setSelectedFiles);
     }
@@ -344,10 +351,9 @@ export default function MessageControls({
           </ClickAwayListener>
         )}
 
-        {/* Recording indicator OR textarea */}
+        {/* Recording indicator OR TextField */}
         {recording ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1, p: 0.5 }}>
-            {/* Pulsing dot */}
             <Box
               sx={{
                 width: 8,
@@ -376,35 +382,47 @@ export default function MessageControls({
             </Typography>
           </Box>
         ) : (
-          <Box
-            component="textarea"
-            ref={textareaRef}
+          <TextField
+            inputRef={textareaRef}
             placeholder="Type a message…"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            rows={1}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            multiline
+            minRows={1}
+            maxRows={6}
+            fullWidth
+            variant="standard"
             sx={{
               flex: 1,
-              resize: "none",
-              border: "none",
-              outline: "none",
-              bgcolor: "transparent",
-              color: "text.primary",
-              fontSize: "0.9rem",
-              lineHeight: 1.6,
-              fontFamily: "inherit",
-              py: 0.5,
-              px: 0.5,
-              overflowY: "auto",
-              maxHeight: 120,
-              "&::placeholder": { color: "text.disabled" },
-              "&::-webkit-scrollbar": { width: 4 },
-              "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
-              "&::-webkit-scrollbar-thumb": { borderRadius: 4, bgcolor: alpha(theme.palette.divider, 0.5) },
-              // ── iOS zoom fix ──
-              "@supports (-webkit-touch-callout: none)": {
-                fontSize: "16px",
+              "& .MuiInputBase-root": {
+                bgcolor: "transparent",
+                color: "text.primary",
+                fontSize: "0.9rem",
+                lineHeight: 1.6,
+                fontFamily: "inherit",
+                py: 0.5,
+                px: 0.5,
+                "& textarea": {
+                  resize: "none",
+                  overflowY: "auto",
+                  maxHeight: "120px",
+                  "@supports (-webkit-touch-callout: none)": {
+                    fontSize: "16px",
+                  },
+                },
+                "&::placeholder": { color: "text.disabled" },
+              },
+              "& .MuiInput-underline:before": { borderBottom: "none" },
+              "& .MuiInput-underline:after": { borderBottom: "none" },
+              "& .MuiInput-underline:hover:not(.Mui-disabled):before": { borderBottom: "none" },
+              "& .MuiInputBase-input::-webkit-scrollbar": { width: 4 },
+              "& .MuiInputBase-input::-webkit-scrollbar-track": { bgcolor: "transparent" },
+              "& .MuiInputBase-input::-webkit-scrollbar-thumb": {
+                borderRadius: 4,
+                bgcolor: alpha(theme.palette.divider, 0.5),
               },
             }}
           />
@@ -414,7 +432,6 @@ export default function MessageControls({
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
           {recording ? (
             <>
-              {/* Discard */}
               <Tooltip title="Discard" placement="top" arrow>
                 <IconButton
                   size="small"
@@ -425,14 +442,17 @@ export default function MessageControls({
                     borderRadius: "10px",
                     color: "text.disabled",
                     border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
-                    "&:hover": { color: "error.main", borderColor: alpha(theme.palette.error.main, 0.4), bgcolor: alpha(theme.palette.error.main, 0.06) },
+                    "&:hover": {
+                      color: "error.main",
+                      borderColor: alpha(theme.palette.error.main, 0.4),
+                      bgcolor: alpha(theme.palette.error.main, 0.06),
+                    },
                   }}
                 >
                   <DeleteOutlineIcon sx={{ fontSize: 17 }} />
                 </IconButton>
               </Tooltip>
 
-              {/* Send recording */}
               <Tooltip title="Send voice message" placement="top" arrow>
                 <IconButton
                   size="small"
@@ -453,7 +473,6 @@ export default function MessageControls({
             </>
           ) : (
             <>
-              {/* Mic — only when nothing to send */}
               {showMic && (
                 <Tooltip title="Voice message" placement="top" arrow>
                   <IconButton
@@ -478,7 +497,6 @@ export default function MessageControls({
                 </Tooltip>
               )}
 
-              {/* Send */}
               <Tooltip title={canSend ? "Send" : ""} placement="top" arrow>
                 <span>
                   <IconButton
@@ -507,9 +525,22 @@ export default function MessageControls({
         </Box>
       </Box>
 
-      {/* Hint text */}
-      <Typography sx={{ fontSize: "0.68rem", color: "text.disabled", mt: 0.75, px: 0.5, textAlign: "right", letterSpacing: "0.02em" }}>
-        {recording ? "Recording… click send or discard" : "Enter to send · Shift+Enter for new line"}
+      {/* Hint text - Mobile-friendly */}
+      <Typography
+        sx={{
+          fontSize: "0.68rem",
+          color: "text.disabled",
+          mt: 0.75,
+          px: 0.5,
+          textAlign: "right",
+          letterSpacing: "0.02em",
+        }}
+      >
+        {recording
+          ? "Recording… click send or discard"
+          : isMobile
+            ? "Tap send or press Enter"
+            : "Enter to send · Shift+Enter for new line"}
       </Typography>
 
       {/* Error snackbar */}
@@ -519,7 +550,12 @@ export default function MessageControls({
         onClose={() => setFileSizeMessage("")}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={() => setFileSizeMessage("")} severity="warning" variant="filled" sx={{ borderRadius: 3, fontSize: "0.82rem" }}>
+        <Alert
+          onClose={() => setFileSizeMessage("")}
+          severity="warning"
+          variant="filled"
+          sx={{ borderRadius: 3, fontSize: "0.82rem" }}
+        >
           {fileSizeMessage}
         </Alert>
       </Snackbar>

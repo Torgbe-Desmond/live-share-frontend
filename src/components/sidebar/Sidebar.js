@@ -26,11 +26,10 @@ function UserAvatar({ username, size = 36, isCurrentUser = false, theme }) {
         sx={{
           width: size,
           height: size,
-          border: `2px solid ${
-            isCurrentUser
+          border: `2px solid ${isCurrentUser
               ? theme.palette.primary.main
               : alpha(theme.palette.divider, 0.6)
-          }`,
+            }`,
           transition: "border-color 0.2s",
         }}
       />
@@ -97,7 +96,8 @@ function RoomChip({ roomName, open }) {
           transition: "all 0.18s ease",
           whiteSpace: "nowrap",
           overflow: "hidden",
-          maxWidth: "100%",
+          justifyContent:"center",
+          width: "100%",
           "&:hover": {
             bgcolor: alpha(theme.palette.primary.main, 0.06),
             borderColor: alpha(theme.palette.primary.main, 0.3),
@@ -273,7 +273,11 @@ export default function Sidebar({
               border: `1px solid ${theme.palette.divider}`,
               borderRadius: 1.5,
               p: 0.5,
-              "&:hover": { bgcolor: alpha(theme.palette.action.hover, 0.5) },
+              "&:hover": {
+                bgcolor: alpha(theme.palette.primary.main, 0.06),
+                borderColor: alpha(theme.palette.primary.main, 0.3),
+                color: "text.primary",
+              },
             }}
           >
             {open ? (
@@ -331,6 +335,7 @@ export default function Sidebar({
         <Box
           sx={{
             display: "flex",
+            width:"100%",
             justifyContent: open ? "flex-start" : "center",
             px: open ? 0.5 : 0,
           }}

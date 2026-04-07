@@ -18,7 +18,7 @@ function App() {
     if (meta) {
       meta.setAttribute(
         "content",
-        isDark ? "#202327" : "#f0f2f5",
+        isDark ? "#202327" : "#FFF",
       );
     }
   }, [prefersDark, theme,isDark]);
