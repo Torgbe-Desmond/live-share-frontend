@@ -153,11 +153,11 @@ export default function FilePreview({
           position: "absolute",
           bottom: 8,
           right: 8,
-          bgcolor: isViewOnce ? "primary.main" : "rgba(255,255,255,0.9)",
-          color: isViewOnce ? "white" : "text.primary",
+          bgcolor: "rgba(0,0,0,0.6)",
+          color: "#fff",
           boxShadow: 1,
           zIndex: 20,
-          "&:hover": { bgcolor: isViewOnce ? "primary.dark" : "white" },
+          "&:hover": { bgcolor: "rgba(0,0,0,0.85)" },
         }}
       >
         <DownloadIcon sx={{ fontSize: 18 }} />

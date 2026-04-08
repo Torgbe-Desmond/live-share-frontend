@@ -186,7 +186,7 @@ export default function VideoPreview({
         <Box sx={{
           position: "relative",
           width: "100%",
-          maxWidth: fullscreen ? "100%" : 400,
+          maxWidth: fullscreen ? "100%" : 300,
           aspectRatio: fullscreen ? "unset" : "16/9",
           height: fullscreen ? "100vh" : "auto",
           bgcolor: "#000",

@@ -59,7 +59,7 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
         <>
             {/* Open Button - Only show if there are files */}
             {files.size > 0 && (
-                <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end', position: "sticky", top: 10, left: 10 }}>
+                <Box sx={{ pr: 1.5, display: 'flex', position: "fixed", top: 10, right: 10 }}>
                     <Tooltip title="View Attachments">
                         <IconButton
                             color="primary"
@@ -105,7 +105,7 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                     </IconButton>
                 </Box>
 
-                <List sx={{ p: 2, pt: 1 }}>
+                <List sx={{ p: 2, pt: 1, }}>
                     {files.size === 0 ? (
                         <ListItem>
                             <ListItemText primary="No files available" />
@@ -120,7 +120,7 @@ const FileDrawer = ({ files = [], buttonText = "View Attachments" }) => {
                                         py: 2.5,
                                         borderRadius: 2,
                                         mb: 1,
-                                        '&:hover': { bgcolor: '#f8f9fa' }
+                                        '&:hover': { bgcolor: 'primary.main' }
                                     }}
                                 >
                                     {/* Avatar / Preview */}

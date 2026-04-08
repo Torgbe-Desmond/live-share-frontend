@@ -133,7 +133,7 @@ const MessageBubble = forwardRef(
                     sx={{
                       position: "absolute",
                       bottom: "calc(100% + 2px)",
-                      [isOwn ? "right" : "left"]: 0,
+                      [isOwn ? "right" : "right"]: 0,
                       zIndex: 10,
                     }}
                   >

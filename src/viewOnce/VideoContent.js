@@ -48,10 +48,28 @@ export default function VideoContent({
   const hideTimer = useRef(null);
 
   const handleToggleFullscreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement)
-      containerRef.current.requestFullscreen().catch(() => { });
-    else document.exitFullscreen().catch(() => { });
+    const container = containerRef.current;
+    const video = videoRef.current;
+
+    if (!container) return;
+
+    // Desktop fullscreen
+    if (document.fullscreenEnabled) {
+      if (!document.fullscreenElement) {
+        container.requestFullscreen().catch(() => { });
+      } else {
+        document.exitFullscreen().catch(() => { });
+      }
+    }
+    // 📱 Mobile fallback (especially iOS)
+    else if (video) {
+      if (video.requestFullscreen) {
+        video.requestFullscreen().catch(() => { });
+      } else if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen(); // iOS Safari
+      }
+    }
+
     onToggleFullscreen?.();
   };
 
@@ -304,7 +322,7 @@ export default function VideoContent({
                 <IconButton
                   size="small"
                   onClick={handleDownload}
-                  sx={{ color: "#fff", p: 0.6 }}
+                  sx={{ p: 0.6 }}
 
                 >
                   <DownloadIcon sx={{ fontSize: 18 }} />

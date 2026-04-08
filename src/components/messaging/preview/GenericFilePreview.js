@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Typography, IconButton, Tooltip } from "@mui/material";
+import { useTheme, useMediaQuery } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -11,13 +12,15 @@ export default function GenericFilePreview({
 }) {
   const [revealed, setRevealed] = useState(!restrictedViewOnce);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   useEffect(() => {
     if (restrictedViewOnce && !revealed) {
-      // mark as viewed after revealing
       const timer = setTimeout(() => {
         setRevealed(true);
         onViewed?.();
-      }, 30000); // 30s view-once timer
+      }, 30000);
       return () => clearTimeout(timer);
     }
   }, [restrictedViewOnce, revealed, onViewed]);
@@ -29,31 +32,27 @@ export default function GenericFilePreview({
     if (!url) return;
 
     try {
-      // 1. Fetch the file data
       const response = await fetch(url);
       const blob = await response.blob();
 
-      // 2. Create a local URL for the blob data
       const file_url = window.URL.createObjectURL(blob);
 
-      // 3. Create the temporary link
       const link = document.createElement("a");
       link.href = file_url;
-      link.download = fileName; // Now the browser WILL respect this
+      link.download = fileName;
 
       document.body.appendChild(link);
       link.click();
 
-      // 4. Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(file_url);
     } catch (error) {
       console.error("Download failed:", error);
-      // Fallback: try opening in new tab if fetch fails (CORS issue)
       window.open(url, "_blank");
     }
   };
 
+  // 🔒 View-once placeholder
   if (restrictedViewOnce && !revealed) {
     return (
       <Box
@@ -61,12 +60,14 @@ export default function GenericFilePreview({
         sx={{
           mt: 1.5,
           p: 2,
+          width: "100%",
+          maxWidth: 420,
           bgcolor: "rgba(0,0,0,0.08)",
           borderRadius: 2.5,
           textAlign: "center",
           cursor: "pointer",
-          maxWidth: 420,
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           alignItems: "center",
           justifyContent: "center",
           gap: 1,
@@ -82,39 +83,46 @@ export default function GenericFilePreview({
   return (
     <Box
       mt={1.2}
-      borderRadius={2}
-      overflow="hidden"
       sx={{
+        width: "100%",
+        maxWidth: 420,
+        borderRadius: 2,
+        overflow: "hidden",
         border: restrictedViewOnce ? "2px dashed #d32f2f" : "",
-        p: 1.5,
+        p: isMobile ? 1.2 : 1.5,
         display: "flex",
         alignItems: "center",
         gap: 1,
-        maxWidth: 420,
         position: "relative",
       }}
     >
-      <DescriptionIcon sx={{ fontSize: 36, color: "#616161" }} />
+      <DescriptionIcon
+        sx={{
+          fontSize: isMobile ? 28 : 36,
+          color: "#616161",
+          flexShrink: 0,
+        }}
+      />
+
       <Typography
         variant="body2"
         sx={{
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
           flex: 1,
+          fontSize: isMobile ? "0.85rem" : "0.9rem",
+          wordBreak: "break-word", // ✅ important for mobile
         }}
       >
         {fileName}
       </Typography>
 
-      {/* Download button */}
       <Tooltip title="Download">
         <IconButton
-          size="small"
+          size={isMobile ? "medium" : "small"} // ✅ better tap target
           onClick={handleDownload}
           sx={{
-            bgcolor: "rgba(255,255,255,0.9)",
-            "&:hover": { bgcolor: "#f0f0f0" },
+            bgcolor: "rgba(0,0,0,0.6)",
+            color: "#fff",
+            "&:hover": { bgcolor: "rgba(0,0,0,0.85)" },
           }}
         >
           <DownloadIcon fontSize="small" />
@@ -133,7 +141,7 @@ export default function GenericFilePreview({
             borderRadius: 10,
             px: 1,
             py: 0.4,
-            fontSize: "0.75rem",
+            fontSize: "0.7rem",
           }}
         >
           <VisibilityOffIcon fontSize="inherit" />

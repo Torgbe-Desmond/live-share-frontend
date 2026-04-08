@@ -142,7 +142,7 @@ const MessageReplyPreview = ({ msg, isOwn, onClickReply }) => {
           {msg.replyTo.content ? (
             <TruncatedText
               text={msg.replyTo.content}
-              maxLength={isMobile ? 60 : 120}
+              maxLength={isMobile ? 60 : 99}
             />
           ) : (
             previewFile && "Attachment"
